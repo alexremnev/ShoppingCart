@@ -1,4 +1,5 @@
-﻿
+﻿@*@model ShoppingCart.Models.Domain.Products;*@
+
 @{
     Layout = null;
 }
@@ -11,8 +12,17 @@
     <title>Index</title>
 </head>
 <body>
+    <h1> Shopping Cart!!!</h1>
     <div> 
-        Shopping Cart!!!
+        @Model
+        @*@foreach (var item in Model)
+        {
+        <h3> @item.Id</h3>
+        <h3> @item.Name</h3>
+        <h3> @item.Quantity</h3>
+        <h3> @item.Price </h3>
+        }*@
+        
     </div>
 </body>
 </html>

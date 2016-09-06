@@ -1,7 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
-                   
-	namespace="ShoppingCart.Models.Domain" assembly="ShoppingCart">
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" namespace="ShoppingCart.Models.Domain" assembly="ShoppingCart">
   <class name="Products">
     <id name="ID" column="Id">
       <generator class="guid"/>

@@ -30,7 +30,9 @@ namespace ShoppingCart.Models
         }
         public static ISession OpenSession()
         {
+            
             return Sessionfactory.OpenSession();
+           
         }
 
     }

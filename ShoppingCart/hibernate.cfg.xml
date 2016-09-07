@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<hiberbate-configuration xmlns="urn:nhibernate-configuration-2.2">
+<hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
   <session-factory>
     <property name="connection.provider">NHibernate.Connection.DriverConnectionProvider</property>
-    <property name="dialect">NHibernate.Dialect.MsSqlServerCeDialect</property>
-    <property name="connection.driver_class">NHibernate.Dialect.MsSqlServerCeDriver</property>
-    <property name="connection.connection_string">Data Source= c:\users\alexr\documents\visual studio 2015\Projects\ShoppingCart\ShoppingCart\App_Data\Database_log.ldf</property>
-    
+    <property name="dialect">NHibernate.Dialect.MySQL5Dialect</property>
+    <property name="connection.driver_class">NHibernate.Driver.MySqlDataDriver</property>
+    <property name="connection.connection_string">server=localhost;user id=root;password=alex;database=ProductsDB</property>
+     <property name="proxyfactory.factory_class">NHibernate.ByteCode.LinFu.ProxyFactoryFactory, NHibernate.ByteCode.LinFu</property>
+    <property name="hbm2ddl.auto">update</property>
     <property name="show_sql">true</property>
   </session-factory>
-</hiberbate-configuration>
+</hibernate-configuration>

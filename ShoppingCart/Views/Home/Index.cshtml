@@ -1,4 +1,4 @@
-﻿@*@model ShoppingCart.Models.Domain.Products;*@
+﻿@*@model IEnumerator<ShoppingCart.Models.Domain.Products>*@
 
 @{
     Layout = null;
@@ -14,15 +14,10 @@
 <body>
     <h1> Shopping Cart!!!</h1>
     <div> 
-        @Model
-        @*@foreach (var item in Model)
-        {
-        <h3> @item.Id</h3>
-        <h3> @item.Name</h3>
-        <h3> @item.Quantity</h3>
-        <h3> @item.Price </h3>
-        }*@
-        
+       
+        Go to Show/Products  
+        @Html.ActionLink("Links", "Products", "Show"); 
+
     </div>
 </body>
 </html>

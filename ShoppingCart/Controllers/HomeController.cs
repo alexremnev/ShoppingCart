@@ -16,22 +16,13 @@ namespace ShoppingCart.Controllers
         // GET: Home
         public ActionResult Index()
         {
-
+            
             ProductsRepository repo = new ProductsRepository();
-            var firstProduct = new Products { Id = new Guid(), Name = "Car", Quantity = 5, Price = 1000 };
+            var firstProduct = new Products {Id=0, Name = "Car", Quantity = 5, Price = 1000.0 };
             repo.Add(firstProduct);
-            List<Products> listProducts = new List<Products>();
-            listProducts.Add(new Products()
-            {
-                Id = new Guid(),
-                Name = "Car",
-                Quantity = 5,
-                Price = 1000
-            });
-            var jsonstring = JsonConvert.SerializeObject(listProducts);
 
 
-            return View(jsonstring);
+            return View();
         }
         public static void LoadNHibernateCfg()
         {

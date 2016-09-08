@@ -12,13 +12,15 @@ namespace ShoppingCart.Controllers
     public class ShowController : Controller
     {
         // GET: Show
+        
+        
+        [Route("Products")]
         public ActionResult Products()
         {
-            
             ProductsRepository repo = new ProductsRepository();
             List<Products> jsonlist = repo.ShowAllProducts();
+
             
-                
 
 
             return Json(jsonlist,JsonRequestBehavior.AllowGet);

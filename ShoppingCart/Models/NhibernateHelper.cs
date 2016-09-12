@@ -1,11 +1,6 @@
 ﻿using NHibernate;
 using NHibernate.Cfg;
 using ShoppingCart.Models.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Text;
 
 namespace ShoppingCart.Models
 {
@@ -21,7 +16,7 @@ namespace ShoppingCart.Models
                 {
                     var configuration = new Configuration();
                     configuration.Configure();
-                    configuration.AddAssembly(typeof(Products).Assembly);
+                    configuration.AddAssembly(typeof(Product).Assembly);
                     _sessionfactory = configuration.BuildSessionFactory();
                     
                 }

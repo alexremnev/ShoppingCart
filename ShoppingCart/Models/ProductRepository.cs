@@ -1,19 +1,15 @@
 ﻿using NHibernate;
 using ShoppingCart.Models.Domain;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Script.Serialization;
-using NHibernate.Hql.Ast.ANTLR;
+
 
 namespace ShoppingCart.Models
 {
-    public class ProductsRepository
+    public class ProductRepository: IProductRepository
     {
-        public void Add(Products newProducts)
+        public void Add(Product newProducts)
         {
-            using (ISession session = NhibernateHelper.OpenSession())
+            using (var session = NhibernateHelper.OpenSession())
             {
                 using (ITransaction transaction = session.BeginTransaction())
                 {
@@ -23,18 +19,18 @@ namespace ShoppingCart.Models
             }
         }
 
-        public Products FindById(int id)
+        public Product FindById(int id)
         {
             using (ISession session = NhibernateHelper.OpenSession())
             {
 
-                var result = session.QueryOver<Products>().Where(x => x.Id == id).SingleOrDefault();
-                return result ?? new Products();
+                var result = session.QueryOver<Product>().Where(x => x.Id == id).SingleOrDefault();
+                return result ?? new Product();
 
             }
         }
 
-        public void Delete(Products product)
+        public void Delete(Product product)
         {
             using (ISession session = NhibernateHelper.OpenSession())
             {
@@ -47,13 +43,13 @@ namespace ShoppingCart.Models
                 
             
         }
-        public List<Products> ShowAllProducts()
+        public List<Product> ShowAllProducts()
         {
             using (ISession session = NhibernateHelper.OpenSession())
             {
 
-                var result = session.QueryOver<Products>().Where(x=>x.Id<100).List();
-                return (List<Products>) result;
+                var result = session.QueryOver<Product>().Where(x=>x.Id<100).List();
+                return (List<Product>) result;
 
             }
         }

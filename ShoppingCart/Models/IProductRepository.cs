@@ -5,9 +5,9 @@ namespace ShoppingCart.Models
 {
     public interface IProductRepository
     {
-        void Add(Product newProducts);
+        void Create(Product newProducts);
         Product FindById(int id);
         void Delete(Product product);
-        List<Product> ShowAllProducts();
+        IList<Product> Read();
     }
 }

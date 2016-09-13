@@ -12,22 +12,17 @@ namespace ShoppingCart.Models
         {
             get
             {
-                if (_sessionfactory == null)
-                {
-                    var configuration = new Configuration();
-                    configuration.Configure();
-                    configuration.AddAssembly(typeof(Product).Assembly);
-                    _sessionfactory = configuration.BuildSessionFactory();
-                    
-                }
+                if (_sessionfactory != null) return _sessionfactory;
+                var configuration = new Configuration();
+                configuration.Configure();
+                configuration.AddAssembly(typeof(Product).Assembly);
+                _sessionfactory = configuration.BuildSessionFactory();
                 return _sessionfactory;
             }
         }
         public static ISession OpenSession()
         {
-            
             return Sessionfactory.OpenSession();
-           
         }
 
     }

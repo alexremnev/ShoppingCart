@@ -18,5 +18,15 @@ namespace ShoppingCart
             var product = Repo.Get(id);
             return product;
         }
+
+        public void Create(Product entity)
+        {
+            Repo.Create(entity);
+        }
+
+        public void Delete(Product product)
+        {
+            Repo.Delete(product);
+        }
     }
 }

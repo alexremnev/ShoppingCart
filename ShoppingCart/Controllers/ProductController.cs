@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using Common.Logging;
+using ShoppingCart.Models.Domain;
 
 namespace ShoppingCart.Controllers
 {
@@ -13,16 +16,31 @@ namespace ShoppingCart.Controllers
 
         [HttpGet]
         [Route]
-        public ActionResult List()
+        public ActionResult List(string filter, string sortBy, int page = 0, int pageSize = 20)
         {
             try
             {
-                var products = ProductService.List();
+                IEnumerable<Product> products = ProductService.List();
+                if (filter != null) products = products.Where(x => x.Name == filter);
+                if (sortBy != null)
+                    switch (sortBy)
+                    {
+                        case "Price":
+                            products = products.OrderBy(x => x.Price);
+                            break;
+                        case "Quantity":
+                            products = products.OrderBy(x => x.Quantity);
+                            break;
+                        default:
+                            products = products.OrderBy(x => x.Name);
+                            break;
+                    }
+                products = products.Skip(page * pageSize).Take(pageSize);
                 return Json(products, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
-                Log.Error(e);
+                Log.Error("Exception occured when you try to get the list of products", e);
                 return Json("Internal server error", JsonRequestBehavior.AllowGet);
             }
         }
@@ -38,7 +56,7 @@ namespace ShoppingCart.Controllers
             }
             catch (Exception e)
             {
-                Log.Error(e);
+                Log.Error("Exception occured when you try to get the product by id", e);
                 return Json("Internal server error", JsonRequestBehavior.AllowGet);
             }
         }

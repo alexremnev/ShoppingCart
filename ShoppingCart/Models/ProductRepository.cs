@@ -6,7 +6,7 @@ namespace ShoppingCart.Models
 {
     public class ProductRepository : IProductRepository
     {
-        public void Create(Product newProducts)
+        public void Create(Product entity)
         {
             using (var session = NhibernateHelper.OpenSession())
             {
@@ -14,18 +14,19 @@ namespace ShoppingCart.Models
                 {
                     try
                     {
-                        session.Save(newProducts);
+                        session.Save(entity);
                         transaction.Commit();
                     }
                     catch (Exception)
                     {
                         transaction.Rollback();
+                        throw;
                     }
                 }
             }
         }
 
-        public IList<Product> Read()
+        public IList<Product> List()
         {
             using (var session = NhibernateHelper.OpenSession())
             {
@@ -33,12 +34,12 @@ namespace ShoppingCart.Models
             }
         }
 
-        public Product FindById(int id)
+        public Product Get(int id)
         {
             using (var session = NhibernateHelper.OpenSession())
             {
                 var result = session.QueryOver<Product>().Where(x => x.Id == id).SingleOrDefault();
-                return result ?? new Product();
+                return result;
             }
         }
 
@@ -56,6 +57,7 @@ namespace ShoppingCart.Models
                     catch (Exception)
                     {
                         transaction.Rollback();
+                        throw;
                     }
                 }
             }

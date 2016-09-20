@@ -1,30 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Web.Mvc;
-using ShoppingCart.Models;
-using ShoppingCart.Models.Domain;
-using Spring.Context;
-using Spring.Context.Support;
+using Common.Logging;
 
 namespace ShoppingCart.Controllers
 {
     [RoutePrefix("products")]
     public class ProductController : Controller
     {
-        private static readonly IApplicationContext Ctx = ContextRegistry.GetContext();
-        private readonly IProductRepository _repo = Ctx.GetObject<ProductRepository>();
+        private static readonly ILog Log = LogManager.GetLogger<ProductController>();
 
+        public IProductService ProductService { get; set; }
+
+        [HttpGet]
         [Route]
         public ActionResult List()
         {
-            IList<Product> jsonlist = _repo.Read();
-            return Json(jsonlist, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var products = ProductService.List();
+                return Json(products, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                return Json("Internal server error", JsonRequestBehavior.AllowGet);
+            }
         }
 
+        [HttpGet]
         [Route("{id:int}")]
-        public ActionResult GetById(int id)
+        public ActionResult Get(int id)
         {
-            var jsonsting = _repo.FindById(id);
-            return Json(jsonsting, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var product = ProductService.Get(id);
+                return Json(product, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                return Json("Internal server error", JsonRequestBehavior.AllowGet);
+            }
         }
     }
 }

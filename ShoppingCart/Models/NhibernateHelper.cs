@@ -24,6 +24,5 @@ namespace ShoppingCart.Models
         {
             return Sessionfactory.OpenSession();
         }
-
     }
 }

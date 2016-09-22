@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
 using Common.Logging;
 using ShoppingCart.Models.Domain;
@@ -16,31 +14,17 @@ namespace ShoppingCart.Controllers
 
         [HttpGet]
         [Route]
-        public ActionResult List(string filter, string sortBy, int page = 0, int pageSize = 20)
+        public ActionResult List(string filter, string sortby, int? pageSize, int page = 0)
         {
             try
             {
-                IEnumerable<Product> products = ProductService.List();
-                if (filter != null) products = products.Where(x => x.Name == filter);
-                if (sortBy != null)
-                    switch (sortBy)
-                    {
-                        case "Price":
-                            products = products.OrderBy(x => x.Price);
-                            break;
-                        case "Quantity":
-                            products = products.OrderBy(x => x.Quantity);
-                            break;
-                        default:
-                            products = products.OrderBy(x => x.Name);
-                            break;
-                    }
-                products = products.Skip(page * pageSize).Take(pageSize);
+                pageSize = pageSize > 50 ? pageSize : 50;
+                var products = ProductService.List(filter, sortby, pageSize, page);
                 return Json(products, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
-                Log.Error("Exception occured when you try to get the list of products", e);
+                Log.Error("Exception occured when you tried to get the list of products", e);
                 return Json("Internal server error", JsonRequestBehavior.AllowGet);
             }
         }
@@ -52,12 +36,45 @@ namespace ShoppingCart.Controllers
             try
             {
                 var product = ProductService.Get(id);
+                if (product == null) return new HttpStatusCodeResult(500);
                 return Json(product, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
-                Log.Error("Exception occured when you try to get the product by id", e);
+                Log.Error("Exception occured when you tried to get the product by id", e);
                 return Json("Internal server error", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        [Route]
+        public HttpStatusCodeResult Create(Product entity)
+        {
+            try
+            {
+                ProductService.Create(entity);
+                return new HttpStatusCodeResult(201);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occured when you tried add a new product",e);
+                return new HttpStatusCodeResult(400);
+            }
+            
+        }
+        [HttpDelete]
+        [Route("{id:int}")]
+        public HttpStatusCodeResult Delete(int id)
+        {
+            try
+            {
+                ProductService.Delete(id);
+                return new HttpStatusCodeResult(204);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occured when you tried to delete the product by id", e);
+                return new HttpStatusCodeResult(400);
             }
         }
     }

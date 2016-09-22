@@ -17,14 +17,18 @@ namespace ShoppingCart.Models
         /// <returns>found entity or null in case there's no entity with passed id found.</returns>
         Product Get(int id);
         /// <summary>
-        /// Deletes a product.
+        /// Delete a product.
         /// </summary>
-        /// <param name="product">entity product</param>
-        void Delete(Product product);
+        /// <param name="id">entity id</param>
+        void Delete(int id);
         /// <summary>
         /// Gets the collection of products.
         /// </summary>
+        /// <param name="filter">filter of products</param>
+        /// <param name="sortby">parameter of sorting</param>
+        /// <param name="pageSize">number of pages</param>
+        /// <param name="page">page number</param>
         /// <returns>List of products</returns>
-        IList<Product> List();
+        IList<Product> List(string filter, string sortby, int? pageSize, int page);
     }
 }

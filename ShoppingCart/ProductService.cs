@@ -8,9 +8,9 @@ namespace ShoppingCart
     {
         public IProductRepository Repo { get; set; }
 
-        public IList<Product> List()
+        public IList<Product> List(string filter, string sortby, int? pageSize, int page)
         {
-            return Repo.List();
+            return Repo.List(filter, sortby, pageSize, page);
         }
 
         public Product Get(int id)
@@ -24,9 +24,9 @@ namespace ShoppingCart
             Repo.Create(entity);
         }
 
-        public void Delete(Product product)
+        public void Delete(int id)
         {
-            Repo.Delete(product);
+            Repo.Delete(id);
         }
     }
 }

@@ -167,6 +167,7 @@
     <Compile Include="Models\IProductRepository.cs" />
     <Compile Include="Models\NhibernateHelper.cs" />
     <Compile Include="Models\ProductRepository.cs" />
+    <Compile Include="NLog-NHibernate.cs" />
     <Compile Include="ProductService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

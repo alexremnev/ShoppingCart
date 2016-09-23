@@ -26,9 +26,9 @@ namespace ShoppingCart.Models
         /// </summary>
         /// <param name="filter">filter of products</param>
         /// <param name="sortby">parameter of sorting</param>
-        /// <param name="pageSize">number of pages</param>
-        /// <param name="page">page number</param>
+        /// <param name="maxResult">quantity of element on one page</param>
+        /// <param name="firstResult">number of page</param>
         /// <returns>List of products</returns>
-        IList<Product> List(string filter, string sortby, int? pageSize, int page);
+        IList<Product> List(string filter, string sortby, int? maxResult, int? firstResult);
     }
 }

@@ -10,6 +10,8 @@ namespace ShoppingCart.Models
     public class ProductRepository : IProductRepository
     {
         private const string DefaultSortby = "id";
+        private const int DefaultMaxResult = 50;
+        private const int DefaultFirstResult = 0;
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
         private static readonly IDictionary<string, Expression<Func<Product, object>>> OrderByFuncs = new Dictionary<string, Expression<Func<Product, object>>>
         {
@@ -46,34 +48,48 @@ namespace ShoppingCart.Models
             }
         }
 
-        public IList<Product> List(string filter, string sortby, int? pageSize, int page)
+        public IList<Product> List(string filter, string sortby, int? maxResult, int? firstResult)
         {
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
-            sortby = OrderByFuncs.ContainsKey(sortby) ? sortby : DefaultSortby;
+            maxResult = maxResult ?? DefaultMaxResult;
+            maxResult = maxResult > 250 ? DefaultMaxResult : maxResult;
+            firstResult = firstResult ?? DefaultFirstResult;
+            var isSortByDescending = sortby.Contains("desc");
+            var isContainOrderByFuncsKey = false;
+
+            foreach (var key in OrderByFuncs)
+            {
+                if (!sortby.Contains(key.Key)) continue;
+                sortby = key.Key;
+                isContainOrderByFuncsKey = true;
+                break;
+            }
+
+            if (!isContainOrderByFuncsKey) sortby = DefaultSortby;
+
             using (var session = NhibernateHelper.OpenSession())
             {
                 try
                 {
                     var query = session.QueryOver<Product>();
-                    if (pageSize.HasValue)
-                    {
-                        query.Take(pageSize.Value).Skip((int)(page * pageSize));
-                    }
+                    firstResult = firstResult.Value * maxResult;
+                    query.Skip(firstResult.Value).Take(maxResult.Value);
+
                     if (!string.IsNullOrEmpty(filter))
                     {
                         query
                             .WhereRestrictionOn(x => x.Name)
                             .IsLike($"{filter}%");
                     }
-
-                    var products = query.OrderBy(OrderByFuncs[sortby]).Asc.List();
+                    query = isSortByDescending ? query.OrderBy(OrderByFuncs[sortby]).Desc : query.OrderBy(OrderByFuncs[sortby]).Asc;
+                    var products = query.List();
                     return products;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    Log.Error("Exception occured when system tried to get the list of products from database");
-                    return null;
+                    Log.Error("Exception occured when system tried to get the list of products from database", e);
+                    throw;
                 }
             }
         }

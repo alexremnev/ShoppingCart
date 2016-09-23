@@ -8,9 +8,9 @@ namespace ShoppingCart
     {
         public IProductRepository Repo { get; set; }
 
-        public IList<Product> List(string filter, string sortby, int? pageSize, int page)
+        public IList<Product> List(string filter, string sortby, int? maxResult, int? firstResult)
         {
-            return Repo.List(filter, sortby, pageSize, page);
+            return Repo.List(filter, sortby, maxResult, firstResult);
         }
 
         public Product Get(int id)

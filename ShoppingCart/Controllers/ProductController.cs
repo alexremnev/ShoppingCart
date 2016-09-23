@@ -14,17 +14,35 @@ namespace ShoppingCart.Controllers
 
         [HttpGet]
         [Route]
-        public ActionResult List(string filter, string sortby, int? pageSize, int page = 0)
+        public ActionResult List(string filter, string sortby, int? maxResult, int? firstResult)
         {
             try
             {
-                pageSize = pageSize > 50 ? pageSize : 50;
-                var products = ProductService.List(filter, sortby, pageSize, page);
-                return Json(products, JsonRequestBehavior.AllowGet);
+                var products = ProductService.List(filter, sortby, maxResult, firstResult);
+                var count = ProductService.List(filter, null, null, null).Count;
+                var productsAndCount = new { products, count };
+                return Json(productsAndCount, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get the list of products", e);
+                return Json("Internal server error", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        [Route("count")]
+        public ActionResult Count(string filter)
+        {
+            try
+            {
+                var products = ProductService.List(filter, null, null, null);
+                var count = new { count = products.Count };
+                return Json(count, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occured when you tried to get count of products", e);
                 return Json("Internal server error", JsonRequestBehavior.AllowGet);
             }
         }
@@ -57,10 +75,10 @@ namespace ShoppingCart.Controllers
             }
             catch (Exception e)
             {
-                Log.Error("Exception occured when you tried add a new product",e);
+                Log.Error("Exception occured when you tried add a new product", e);
                 return new HttpStatusCodeResult(400);
             }
-            
+
         }
         [HttpDelete]
         [Route("{id:int}")]

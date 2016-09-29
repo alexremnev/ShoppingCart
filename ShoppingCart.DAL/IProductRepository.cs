@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using ShoppingCart.DAL;
 
-namespace ShoppingCart
+namespace ShoppingCart.DAL
 {
-    public interface IProductService
+    public interface IProductRepository
     {
         /// <summary>
         /// Create a product.

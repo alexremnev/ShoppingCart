@@ -1,4 +1,4 @@
-﻿namespace ShoppingCart.Models.Domain
+﻿namespace ShoppingCart.DAL
 {
     public class Product
     {

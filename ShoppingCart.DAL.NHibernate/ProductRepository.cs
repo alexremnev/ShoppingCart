@@ -1,17 +1,16 @@
 ﻿using System;
-using ShoppingCart.Models.Domain;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Common.Logging;
 using NHibernate;
 
-namespace ShoppingCart.Models
+namespace ShoppingCart.DAL.NHibernate
 {
     public class ProductRepository : IProductRepository
     {
         private const string DefaultSortby = "id";
-        private const int DefaultMaxResult = 50;
-        private const int DefaultFirstResult = 0;
+        private const int MaxNameLength = 50;
+        private const string DefaultSortDirection = "asc";
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
         private static readonly IDictionary<string, Expression<Func<Product, object>>> OrderByFuncs = new Dictionary<string, Expression<Func<Product, object>>>
         {
@@ -27,7 +26,8 @@ namespace ShoppingCart.Models
                 {
                     try
                     {
-                        if (entity.Name.Length > 50) throw new Exception("Name consists of more than 50 letters or null");
+                        if (entity.Name.Length > MaxNameLength) throw new Exception(
+                            $"Name consists of more than {MaxNameLength} letters or null");
                         session.Save(entity);
                         transaction.Commit();
                     }
@@ -48,33 +48,20 @@ namespace ShoppingCart.Models
             }
         }
 
-        public IList<Product> List(string filter, string sortby, int? maxResult, int? firstResult)
+        public IList<Product> List(string filter, string sortby, string sortDirection, int firstResult, int maxResults)
         {
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
-            maxResult = maxResult ?? DefaultMaxResult;
-            maxResult = maxResult > 250 ? DefaultMaxResult : maxResult;
-            firstResult = firstResult ?? DefaultFirstResult;
-            var isSortByDescending = sortby.Contains("desc");
-            var isContainOrderByFuncsKey = false;
-
-            foreach (var key in OrderByFuncs)
-            {
-                if (!sortby.Contains(key.Key)) continue;
-                sortby = key.Key;
-                isContainOrderByFuncsKey = true;
-                break;
-            }
-
-            if (!isContainOrderByFuncsKey) sortby = DefaultSortby;
-
+            sortby = OrderByFuncs.ContainsKey(sortby) ? sortby : DefaultSortby;
+            sortDirection = sortDirection ?? DefaultSortDirection;
+            sortDirection = sortDirection.ToLowerInvariant();
+            sortDirection = sortDirection.Contains("desc") ? "desc" : DefaultSortDirection;
             using (var session = NhibernateHelper.OpenSession())
             {
                 try
                 {
                     var query = session.QueryOver<Product>();
-                    firstResult = firstResult.Value * maxResult;
-                    query.Skip(firstResult.Value).Take(maxResult.Value);
+                    query.Skip(firstResult).Take(maxResults);
 
                     if (!string.IsNullOrEmpty(filter))
                     {
@@ -82,13 +69,36 @@ namespace ShoppingCart.Models
                             .WhereRestrictionOn(x => x.Name)
                             .IsLike($"{filter}%");
                     }
-                    query = isSortByDescending ? query.OrderBy(OrderByFuncs[sortby]).Desc : query.OrderBy(OrderByFuncs[sortby]).Asc;
-                    var products = query.List();
+                    var orderBy = query.OrderBy(OrderByFuncs[sortby]);
+                    var products = (sortDirection != DefaultSortDirection) ? orderBy.Desc.List() : orderBy.Asc.List();
                     return products;
                 }
                 catch (Exception e)
                 {
                     Log.Error("Exception occured when system tried to get the list of products from database", e);
+                    throw;
+                }
+            }
+        }
+
+        public int Count(string filter)
+        {
+            using (var session = NhibernateHelper.OpenSession())
+            {
+                try
+                {
+                    var query = session.QueryOver<Product>();
+                    if (!string.IsNullOrEmpty(filter))
+                    {
+                        query
+                            .WhereRestrictionOn(x => x.Name)
+                            .IsLike($"{filter}%");
+                    }
+                    return query.List().Count;
+                }
+                catch (HibernateException e)
+                {
+                    Log.Error("Exception occured when system tried to get the count of products from database", e);
                     throw;
                 }
             }
@@ -102,10 +112,10 @@ namespace ShoppingCart.Models
                 {
                     return session.QueryOver<Product>().Where(x => x.Id == id).SingleOrDefault();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    Log.Error("Exception occured when system tried to get the list of products by id from database");
-                    return null;
+                    Log.Error("Exception occured when system tried to get the list of products by id from database", e);
+                    throw;
                 }
             }
         }

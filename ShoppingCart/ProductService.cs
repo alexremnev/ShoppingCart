@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using ShoppingCart.Models;
-using ShoppingCart.Models.Domain;
+using ShoppingCart.DAL;
+using ShoppingCart.DAL.NHibernate;
+
 
 namespace ShoppingCart
 {
@@ -8,9 +9,9 @@ namespace ShoppingCart
     {
         public IProductRepository Repo { get; set; }
 
-        public IList<Product> List(string filter, string sortby, int? maxResult, int? firstResult)
+        public IList<Product> List(string filter, string sortby, string sortDirection, int firstResult, int maxResults)
         {
-            return Repo.List(filter, sortby, maxResult, firstResult);
+            return Repo.List(filter, sortby, sortDirection, firstResult, maxResults);
         }
 
         public Product Get(int id)
@@ -27,6 +28,11 @@ namespace ShoppingCart
         public void Delete(int id)
         {
             Repo.Delete(id);
+        }
+
+        public int Count(string filter)
+        {
+            return Repo.Count(filter);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using Common.Logging;
-using ShoppingCart.Models.Domain;
+using ShoppingCart.DAL;
+
 
 namespace ShoppingCart.Controllers
 {
@@ -9,24 +11,35 @@ namespace ShoppingCart.Controllers
     public class ProductController : Controller
     {
         private static readonly ILog Log = LogManager.GetLogger<ProductController>();
+        private const int DefaultPageResult = 0;
+        private const int DefaultMaxResult = 50;
+        private readonly IProductService _productService;
 
-        public IProductService ProductService { get; set; }
+        public ProductController(IProductService productService)
+        {
+            _productService = productService;
+        }
 
         [HttpGet]
         [Route]
-        public ActionResult List(string filter, string sortby, int? maxResult, int? firstResult)
+        public ActionResult List(string filter, string sortby, string sortDirection, int? pageResult, int? maxResults)
         {
             try
             {
-                var products = ProductService.List(filter, sortby, maxResult, firstResult);
-                var count = ProductService.List(filter, null, null, null).Count;
+               pageResult = pageResult ?? DefaultPageResult;
+                maxResults = maxResults ?? DefaultMaxResult;
+                maxResults = maxResults > 250 ? DefaultMaxResult : maxResults;
+                var firstResult = pageResult * maxResults;
+                IList<Product> products = null;
+                var count = _productService.Count(filter);
+                if (count != 0) products = _productService.List(filter, sortby, sortDirection, firstResult.Value, maxResults.Value);
                 var productsAndCount = new { products, count };
                 return Json(productsAndCount, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get the list of products", e);
-                return Json("Internal server error", JsonRequestBehavior.AllowGet);
+                return new HttpStatusCodeResult(500);
             }
         }
 
@@ -36,14 +49,13 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                var products = ProductService.List(filter, null, null, null);
-                var count = new { count = products.Count };
+                var count = new { count = _productService.Count(filter) };
                 return Json(count, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get count of products", e);
-                return Json("Internal server error", JsonRequestBehavior.AllowGet);
+                return new HttpStatusCodeResult(500);
             }
         }
 
@@ -53,14 +65,15 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                var product = ProductService.Get(id);
+                if (id < 0) return new HttpStatusCodeResult(400);
+                var product = _productService.Get(id);
                 if (product == null) return new HttpStatusCodeResult(500);
                 return Json(product, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get the product by id", e);
-                return Json("Internal server error", JsonRequestBehavior.AllowGet);
+                return new HttpStatusCodeResult(500);
             }
         }
 
@@ -70,7 +83,7 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                ProductService.Create(entity);
+                _productService.Create(entity);
                 return new HttpStatusCodeResult(201);
             }
             catch (Exception e)
@@ -86,7 +99,7 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                ProductService.Delete(id);
+                _productService.Delete(id);
                 return new HttpStatusCodeResult(204);
             }
             catch (Exception e)

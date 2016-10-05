@@ -1,10 +1,9 @@
 ﻿using NHibernate;
 using NHibernate.Cfg;
-using NHibernate.Tool.hbm2ddl;
 
 namespace ShoppingCart.DAL.NHibernate
 {
-    public class NhibernateHelper
+    public static class NhibernateHelper
     {
         private static ISessionFactory _sessionfactory;
 
@@ -18,8 +17,15 @@ namespace ShoppingCart.DAL.NHibernate
                 configuration.AddAssembly(typeof(Product).Assembly);
                 _sessionfactory = configuration.BuildSessionFactory();
                 return _sessionfactory;
-
             }
+        }
+
+        public static void Reset()
+        {
+            if (_sessionfactory == null) return;
+            _sessionfactory.Dispose();
+            _sessionfactory = null;
+
         }
         public static ISession OpenSession()
         {

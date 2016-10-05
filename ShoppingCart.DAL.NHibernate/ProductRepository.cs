@@ -8,6 +8,8 @@ namespace ShoppingCart.DAL.NHibernate
 {
     public class ProductRepository : IProductRepository
     {
+        private const int DefaultFirstResult = 0;
+        private const int DefaultMaxResult = 50;
         private const string DefaultSortby = "id";
         private const int MaxNameLength = 50;
         private const string DefaultSortDirection = "asc";
@@ -50,6 +52,8 @@ namespace ShoppingCart.DAL.NHibernate
 
         public IList<Product> List(string filter, string sortby, string sortDirection, int firstResult, int maxResults)
         {
+            if (firstResult < 0) firstResult = DefaultFirstResult;
+            if ((maxResults <= 0) || (maxResults > 250)) maxResults = DefaultMaxResult;
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
             sortby = OrderByFuncs.ContainsKey(sortby) ? sortby : DefaultSortby;
@@ -67,7 +71,7 @@ namespace ShoppingCart.DAL.NHibernate
                     {
                         query
                             .WhereRestrictionOn(x => x.Name)
-                            .IsLike($"{filter}%");
+                            .IsLike($"%{filter}%");
                     }
                     var orderBy = query.OrderBy(OrderByFuncs[sortby]);
                     var products = (sortDirection != DefaultSortDirection) ? orderBy.Desc.List() : orderBy.Asc.List();
@@ -92,7 +96,7 @@ namespace ShoppingCart.DAL.NHibernate
                     {
                         query
                             .WhereRestrictionOn(x => x.Name)
-                            .IsLike($"{filter}%");
+                            .IsLike($"%{filter}%");
                     }
                     return query.List().Count;
                 }

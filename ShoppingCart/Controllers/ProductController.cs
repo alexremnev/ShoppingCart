@@ -26,9 +26,11 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-               pageResult = pageResult ?? DefaultPageResult;
+                pageResult = pageResult ?? DefaultPageResult;
+                pageResult = pageResult < 0 ? DefaultPageResult : pageResult;
                 maxResults = maxResults ?? DefaultMaxResult;
                 maxResults = maxResults > 250 ? DefaultMaxResult : maxResults;
+                maxResults = maxResults < 0 ? DefaultMaxResult : maxResults;
                 var firstResult = pageResult * maxResults;
                 IList<Product> products = null;
                 var count = _productService.Count(filter);

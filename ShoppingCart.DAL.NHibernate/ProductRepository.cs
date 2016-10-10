@@ -12,29 +12,32 @@ namespace ShoppingCart.DAL.NHibernate
         private const int DefaultMaxResult = 50;
         private const string DefaultSortby = "id";
         private const int MaxNameLength = 50;
-        private const string DefaultSortDirection = "asc";
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
-        private static readonly IDictionary<string, Expression<Func<Product, object>>> OrderByFuncs = new Dictionary<string, Expression<Func<Product, object>>>
-        {
-            {DefaultSortby, p => p.Id },
-            {"price", p => p.Price },
-            {"quantity", p => p.Quantity }
-        };
+        private static readonly IDictionary<string, Expression<Func<Product, object>>> OrderByFuncs = new Dictionary
+            <string, Expression<Func<Product, object>>>
+            {
+                {DefaultSortby, p => p.Id},
+                {"price", p => p.Price},
+                {"quantity", p => p.Quantity}
+            };
+
         public void Create(Product entity)
         {
+            if (entity == null) throw new RepositoryException("Name is null");
+            if (entity.Name.Length > MaxNameLength)
+                throw new RepositoryException($"Name consists of more than {MaxNameLength} letters");
             using (var session = NhibernateHelper.OpenSession())
             {
                 using (var transaction = session.BeginTransaction())
                 {
                     try
                     {
-                        if (entity.Name.Length > MaxNameLength) throw new Exception(
-                            $"Name consists of more than {MaxNameLength} letters or null");
                         session.Save(entity);
                         transaction.Commit();
                     }
                     catch (Exception e)
                     {
+                        Log.Error($"Exception occured when system tried save the product ={entity}", e);
                         try
                         {
                             transaction.Rollback();
@@ -43,23 +46,20 @@ namespace ShoppingCart.DAL.NHibernate
                         {
                             Log.Error("Exception occurred when system tried to roll back transaction", exception);
                         }
-                        Log.Error(e.Message, e);
                         throw;
                     }
                 }
             }
         }
 
-        public IList<Product> List(string filter, string sortby, string sortDirection, int firstResult, int maxResults)
+        public IList<Product> List(string filter = null, string sortby = null, bool sortDirection = true, int firstResult = 0, int maxResults = 50)
         {
             if (firstResult < 0) firstResult = DefaultFirstResult;
-            if ((maxResults <= 0) || (maxResults > 250)) maxResults = DefaultMaxResult;
+            if (maxResults < 0) maxResults = DefaultMaxResult;
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
             sortby = OrderByFuncs.ContainsKey(sortby) ? sortby : DefaultSortby;
-            sortDirection = sortDirection ?? DefaultSortDirection;
-            sortDirection = sortDirection.ToLowerInvariant();
-            sortDirection = sortDirection.Contains("desc") ? "desc" : DefaultSortDirection;
+
             using (var session = NhibernateHelper.OpenSession())
             {
                 try
@@ -67,15 +67,10 @@ namespace ShoppingCart.DAL.NHibernate
                     var query = session.QueryOver<Product>();
                     query.Skip(firstResult).Take(maxResults);
 
-                    if (!string.IsNullOrEmpty(filter))
-                    {
-                        query
-                            .WhereRestrictionOn(x => x.Name)
-                            .IsLike($"%{filter}%");
-                    }
+                    GetListWithFilter(filter, query);
                     var orderBy = query.OrderBy(OrderByFuncs[sortby]);
-                    var products = (sortDirection != DefaultSortDirection) ? orderBy.Desc.List() : orderBy.Asc.List();
-                    return products;
+                    var products = (sortDirection) ? orderBy.Asc : orderBy.Desc;
+                    return products.List();
                 }
                 catch (Exception e)
                 {
@@ -85,24 +80,21 @@ namespace ShoppingCart.DAL.NHibernate
             }
         }
 
-        public int Count(string filter)
+        public int Count(string filter = null)
         {
             using (var session = NhibernateHelper.OpenSession())
             {
                 try
                 {
                     var query = session.QueryOver<Product>();
-                    if (!string.IsNullOrEmpty(filter))
-                    {
-                        query
-                            .WhereRestrictionOn(x => x.Name)
-                            .IsLike($"%{filter}%");
-                    }
-                    return query.List().Count;
+                    GetListWithFilter(filter, query);
+                    return query.RowCount();
                 }
                 catch (HibernateException e)
                 {
-                    Log.Error("Exception occured when system tried to get the count of products from database", e);
+                    Log.Error(
+                        $"Exception occured when system tried to get the count of products from database with filter ={filter}",
+                        e);
                     throw;
                 }
             }
@@ -114,11 +106,12 @@ namespace ShoppingCart.DAL.NHibernate
             {
                 try
                 {
-                    return session.QueryOver<Product>().Where(x => x.Id == id).SingleOrDefault();
+                    return session.Get<Product>(id);
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Exception occured when system tried to get the list of products by id from database", e);
+                    Log.Error(
+                        $"Exception occured when system tried to get the list of products by id ={id} from database", e);
                     throw;
                 }
             }
@@ -126,18 +119,29 @@ namespace ShoppingCart.DAL.NHibernate
 
         public void Delete(int id)
         {
+            var product = Get(id);
+            try
+            {
+                if (product == null) throw new RepositoryException();
+            }
+            catch (RepositoryException)
+            {
+                Log.Error("Exception occured when you tried delete product which equal null");
+                throw;
+            }
+
             using (var session = NhibernateHelper.OpenSession())
             {
                 using (var transaction = session.BeginTransaction())
                 {
                     try
                     {
-                        var product = Get(id);
                         session.Delete(product);
                         transaction.Commit();
                     }
                     catch (Exception e)
                     {
+                        Log.Error($"Exception occured when system tried to delete the object by id= {id}", e);
                         try
                         {
                             transaction.Rollback();
@@ -146,10 +150,18 @@ namespace ShoppingCart.DAL.NHibernate
                         {
                             Log.Error("Exception occurred when system tried to roll back transaction", exception);
                         }
-                        Log.Error("Exception occured when system tried to delete the object by id", e);
                         throw;
                     }
                 }
+            }
+        }
+        private static void GetListWithFilter(string filter, IQueryOver<Product, Product> query)
+        {
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query
+                    .WhereRestrictionOn(x => x.Name)
+                    .IsInsensitiveLike($"%{filter}%");
             }
         }
     }

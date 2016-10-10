@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using ShoppingCart.DAL;
-using ShoppingCart.DAL.NHibernate;
-
 
 namespace ShoppingCart
 {
@@ -9,7 +7,7 @@ namespace ShoppingCart
     {
         public IProductRepository Repo { get; set; }
 
-        public IList<Product> List(string filter, string sortby, string sortDirection, int firstResult, int maxResults)
+        public IList<Product> List(string filter, string sortby, bool sortDirection, int firstResult, int maxResults)
         {
             return Repo.List(filter, sortby, sortDirection, firstResult, maxResults);
         }

@@ -13,6 +13,7 @@ namespace ShoppingCart.Controllers
         private static readonly ILog Log = LogManager.GetLogger<ProductController>();
         private const int DefaultPageResult = 0;
         private const int DefaultMaxResult = 50;
+        private const bool DefaultSortDirection = true;
         private readonly IProductService _productService;
 
         public ProductController(IProductService productService)
@@ -22,19 +23,20 @@ namespace ShoppingCart.Controllers
 
         [HttpGet]
         [Route]
-        public ActionResult List(string filter, string sortby, string sortDirection, int? pageResult, int? maxResults)
+        public ActionResult List(string filter, string sortby, bool? sortDirection, int? pageResult, int? maxResults)
         {
             try
             {
-                pageResult = pageResult ?? DefaultPageResult;
+                sortDirection = sortDirection ?? DefaultSortDirection;
+               pageResult = pageResult ?? DefaultPageResult;
                 pageResult = pageResult < 0 ? DefaultPageResult : pageResult;
                 maxResults = maxResults ?? DefaultMaxResult;
                 maxResults = maxResults > 250 ? DefaultMaxResult : maxResults;
-                maxResults = maxResults < 0 ? DefaultMaxResult : maxResults;
+                maxResults = maxResults <= 0 ? DefaultMaxResult : maxResults;
                 var firstResult = pageResult * maxResults;
                 IList<Product> products = null;
                 var count = _productService.Count(filter);
-                if (count != 0) products = _productService.List(filter, sortby, sortDirection, firstResult.Value, maxResults.Value);
+                if (count != 0) products = _productService.List(filter, sortby, sortDirection.Value, firstResult.Value, maxResults.Value);
                 var productsAndCount = new { products, count };
                 return Json(productsAndCount, JsonRequestBehavior.AllowGet);
             }

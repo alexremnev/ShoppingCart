@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ShoppingCart.DAL.NHibernate
+namespace ShoppingCart.DAL
 {
-    public class RepositoryException : InternalException
+    public class RepositoryException : Exception
     {
         public RepositoryException() { }
         public RepositoryException(string message) : base(message) { }

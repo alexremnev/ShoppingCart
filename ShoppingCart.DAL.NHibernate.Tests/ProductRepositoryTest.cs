@@ -1,18 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
+using NHibernate;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Spring.Testing.Microsoft;
 
 
 namespace ShoppingCart.DAL.NHibernate.Tests
 {
-    [TestFixture]
-    public class ProductRepositoryTest
+    [TestClass]
+    public class ProductRepositoryTest : AbstractTransactionalDbProviderSpringContextTests
     {
-        private static IList<Product> CreateInitialData(IEnumerable<Product> products)
+        public static ISessionFactory Sessionfactory { get; set; }
+        public static IProductRepository ProductRepository { get; set; }
+
+        private IList<Product> CreateInitialData(IEnumerable<Product> products)
         {
             var initialList = products.ToList();
-            using (var session = NhibernateHelper.OpenSession())
+            using (var session = Sessionfactory.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
                 foreach (var product in initialList)
@@ -22,19 +28,19 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             return initialList;
         }
 
-        [SetUp]
+        [TestInitialize]
         public void SetupContext()
         {
-            NhibernateHelper.Reset();
+            AdoTemplate.ExecuteNonQuery(CommandType.Text, "TRUNCATE TABLE product ");
         }
 
-        [Test]
+        [TestMethod]
         public void Can_create_new_product()
         {
             var expected = CreateProduct("Car");
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
             repository.Create(expected);
-            using (var session = NhibernateHelper.OpenSession())
+            using (var session = Sessionfactory.OpenSession())
             {
                 var actual = session.Get<Product>(expected.Id);
 
@@ -44,20 +50,16 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             }
         }
 
-        [Test]
+        [TestMethod]
         public void Can_create_new_product_with_longname()
         {
-            var repository = new ProductRepository();
-
-            Assert.Throws<RepositoryException>(
-                () => repository.Create(CreateProduct(GenerateName(50))));
-            Assert.Throws<RepositoryException>(
-                () => repository.Create(CreateProduct(GenerateName(51))));
-            Assert.Throws<RepositoryException>(
-                () => repository.Create(CreateProduct(GenerateName(100))));
+            var repository = ProductRepository;
+            AssertException.Throws<RepositoryException>(() => repository.Create(CreateProduct(GenerateName(50))));
+            AssertException.Throws<RepositoryException>(() => repository.Create(CreateProduct(GenerateName(51))));
+            AssertException.Throws<RepositoryException>(() => repository.Create(CreateProduct(GenerateName(52))));
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_product_by_id()
         {
             Product[] list =
@@ -70,7 +72,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
 
         };
             var expectedList = CreateInitialData(list);
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
             var notExistId = expectedList.Last().Id + 1000;
 
             foreach (var expected in expectedList)
@@ -82,10 +84,10 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             Assert.IsNull(repository.Get(notExistId));
         }
 
-        [Test]
+        [TestMethod]
         public void Can_remove_product_by_id()
         {
-            // given
+
             Product[] list =
               {
             CreateProduct("Car yellow",5,15000),
@@ -96,20 +98,20 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         };
             var expectedList = CreateInitialData(list);
             var product = expectedList.Last();
-            var repository = new ProductRepository();
-            //when
+            var repository = ProductRepository;
+
             repository.Delete(product.Id);
             var notExistId = product.Id + 1000;
-            //then
-            using (var session = NhibernateHelper.OpenSession())
+
+            using (var session = Sessionfactory.OpenSession())
             {
                 var anObject = session.Get<Product>(product.Id);
                 Assert.IsNull(anObject);
-                Assert.Throws<RepositoryException>(() => repository.Delete(notExistId));
+                repository.Delete(notExistId);
             }
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_count_with_filter()
         {
             var noise = new List<Product>{
@@ -133,7 +135,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             CountAssert(expected, "pP");
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_count_without_filter()
         {
             Product[] list =
@@ -145,14 +147,14 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             CreateProduct("apple",25,40)
         };
             var expected = CreateInitialData(list).Count;
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
 
             var actual = repository.Count();
 
             Assert.AreEqual(expected, actual);
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_list_without_filters()
         {
             Product[] list =
@@ -164,14 +166,14 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             CreateProduct("apple",25,40)
         };
             var expected = CreateInitialData(list);
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
 
             var actual = repository.List();
 
             AssertList(expected, actual);
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_list_with_filter()
         {
             var noise = new List<Product>{
@@ -186,7 +188,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         };
             var all = noise.Union(expectedList);
             CreateInitialData(all);
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
             var expected = expectedList;
 
             var actual = repository.List("pp");
@@ -194,7 +196,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             AssertList(expected, actual);
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_list_with_filter_sortBy()
         {
             Product[] list =
@@ -215,7 +217,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             AssertSortBy(expectedResultByQuantity, "Quantity");
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_list_with_filter_sortDirection()
         {
             Product[] list =
@@ -233,7 +235,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             AssertSortDirection(expectedDesc, false);
         }
 
-        [Test]
+        [TestMethod]
         public void Can_get_list_with_filter_firstResult_and_maxResult()
         {
             Product[] list =
@@ -244,7 +246,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             CreateProduct("Apple anotherType",5,37),
             CreateProduct("apple",25,40)
         };
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
             var expected = CreateInitialData(list);
 
             AssertFirstResultAndMaxResult(expected, 0, 2);
@@ -276,34 +278,34 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             }
         }
 
-        private static void CountAssert(int expected, string filter)
+        private void CountAssert(int expected, string filter)
         {
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
 
             var actual = repository.Count(filter);
 
             Assert.AreEqual(expected, actual);
         }
 
-        private static void AssertSortBy(IList<Product> expected, string sortBy)
+        private void AssertSortBy(IList<Product> expected, string sortBy)
         {
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
             var actual = repository.List(null, sortBy);
             AssertList(expected, actual);
         }
 
-        private static void AssertSortDirection(IList<Product> expected, bool sortDirection)
+        private void AssertSortDirection(IList<Product> expected, bool sortDirection)
         {
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
 
             var actual = repository.List(null, null, sortDirection);
 
             AssertList(expected, actual);
         }
 
-        private static void AssertFirstResultAndMaxResult(IList<Product> expected, int firstResult, int maxResult)
+        private void AssertFirstResultAndMaxResult(IList<Product> expected, int firstResult, int maxResult)
         {
-            var repository = new ProductRepository();
+            var repository = ProductRepository;
             expected = expected.Skip(firstResult).Take(maxResult).ToList();
 
             var actual = repository.List(null, null, true, firstResult, maxResult);
@@ -322,5 +324,9 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         {
             return new Product { Name = name, Quantity = quantity, Price = price };
         }
+
+        protected override string[] ConfigLocations => new[] { "assembly://ShoppingCart.DAL.NHibernate.Tests/ShoppingCart.DAL.NHibernate.Tests/DI.xml" };
+
     }
+
 }

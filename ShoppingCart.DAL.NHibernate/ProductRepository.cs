@@ -8,6 +8,8 @@ namespace ShoppingCart.DAL.NHibernate
 {
     public class ProductRepository : IProductRepository
     {
+        public ISessionFactory Sessionfactory { get; set; }
+
         private const int DefaultFirstResult = 0;
         private const int DefaultMaxResult = 50;
         private const string DefaultSortby = "id";
@@ -26,7 +28,7 @@ namespace ShoppingCart.DAL.NHibernate
             if (entity == null) throw new RepositoryException("Name is null");
             if (entity.Name.Length > MaxNameLength)
                 throw new RepositoryException($"Name consists of more than {MaxNameLength} letters");
-            using (var session = NhibernateHelper.OpenSession())
+            using (var session = Sessionfactory.OpenSession())
             {
                 using (var transaction = session.BeginTransaction())
                 {
@@ -52,24 +54,26 @@ namespace ShoppingCart.DAL.NHibernate
             }
         }
 
-        public IList<Product> List(string filter = null, string sortby = null, bool sortDirection = true, int firstResult = 0, int maxResults = 50)
+        public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50)
         {
+
             if (firstResult < 0) firstResult = DefaultFirstResult;
             if (maxResults < 0) maxResults = DefaultMaxResult;
+            if (maxResults == 0) return new List<Product>();
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
             sortby = OrderByFuncs.ContainsKey(sortby) ? sortby : DefaultSortby;
 
-            using (var session = NhibernateHelper.OpenSession())
+            using (var session = Sessionfactory.OpenSession())
             {
                 try
                 {
                     var query = session.QueryOver<Product>();
                     query.Skip(firstResult).Take(maxResults);
 
-                    GetListWithFilter(filter, query);
+                    SetUpFilter(filter, query);
                     var orderBy = query.OrderBy(OrderByFuncs[sortby]);
-                    var products = (sortDirection) ? orderBy.Asc : orderBy.Desc;
+                    var products = (isAscending) ? orderBy.Asc : orderBy.Desc;
                     return products.List();
                 }
                 catch (Exception e)
@@ -82,12 +86,12 @@ namespace ShoppingCart.DAL.NHibernate
 
         public int Count(string filter = null)
         {
-            using (var session = NhibernateHelper.OpenSession())
+            using (var session = Sessionfactory.OpenSession())
             {
                 try
                 {
                     var query = session.QueryOver<Product>();
-                    GetListWithFilter(filter, query);
+                    SetUpFilter(filter, query);
                     return query.RowCount();
                 }
                 catch (HibernateException e)
@@ -102,7 +106,7 @@ namespace ShoppingCart.DAL.NHibernate
 
         public Product Get(int id)
         {
-            using (var session = NhibernateHelper.OpenSession())
+            using (var session = Sessionfactory.OpenSession())
             {
                 try
                 {
@@ -120,17 +124,10 @@ namespace ShoppingCart.DAL.NHibernate
         public void Delete(int id)
         {
             var product = Get(id);
-            try
-            {
-                if (product == null) throw new RepositoryException();
-            }
-            catch (RepositoryException)
-            {
-                Log.Error("Exception occured when you tried delete product which equal null");
-                throw;
-            }
 
-            using (var session = NhibernateHelper.OpenSession())
+            if (product == null) return;
+
+            using (var session = Sessionfactory.OpenSession())
             {
                 using (var transaction = session.BeginTransaction())
                 {
@@ -155,7 +152,7 @@ namespace ShoppingCart.DAL.NHibernate
                 }
             }
         }
-        private static void GetListWithFilter(string filter, IQueryOver<Product, Product> query)
+        private static void SetUpFilter(string filter, IQueryOver<Product, Product> query)
         {
             if (!string.IsNullOrEmpty(filter))
             {

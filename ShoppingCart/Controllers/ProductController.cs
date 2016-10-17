@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Web.Mvc;
 using Common.Logging;
 using ShoppingCart.DAL;
@@ -28,7 +29,7 @@ namespace ShoppingCart.Controllers
             try
             {
                 sortDirection = sortDirection ?? DefaultSortDirection;
-               pageResult = pageResult ?? DefaultPageResult;
+                pageResult = pageResult ?? DefaultPageResult;
                 pageResult = pageResult < 0 ? DefaultPageResult : pageResult;
                 maxResults = maxResults ?? DefaultMaxResult;
                 maxResults = maxResults > 250 ? DefaultMaxResult : maxResults;
@@ -43,7 +44,7 @@ namespace ShoppingCart.Controllers
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get the list of products", e);
-                return new HttpStatusCodeResult(500);
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
 
@@ -59,7 +60,7 @@ namespace ShoppingCart.Controllers
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get count of products", e);
-                return new HttpStatusCodeResult(500);
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
 
@@ -69,15 +70,15 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                if (id < 0) return new HttpStatusCodeResult(400);
+                if (id < 0) return new HttpStatusCodeResult(HttpStatusCode.NotFound);
                 var product = _productService.Get(id);
-                if (product == null) return new HttpStatusCodeResult(500);
+                if (product == null) return new HttpStatusCodeResult(HttpStatusCode.NotFound);
                 return Json(product, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to get the product by id", e);
-                return new HttpStatusCodeResult(500);
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
 
@@ -88,12 +89,12 @@ namespace ShoppingCart.Controllers
             try
             {
                 _productService.Create(entity);
-                return new HttpStatusCodeResult(201);
+                return new HttpStatusCodeResult(HttpStatusCode.Created);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried add a new product", e);
-                return new HttpStatusCodeResult(400);
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
         }
@@ -103,13 +104,14 @@ namespace ShoppingCart.Controllers
         {
             try
             {
+                if (id < 0) return new HttpStatusCodeResult(HttpStatusCode.NotFound);
                 _productService.Delete(id);
-                return new HttpStatusCodeResult(204);
+                return new HttpStatusCodeResult(HttpStatusCode.NoContent);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to delete the product by id", e);
-                return new HttpStatusCodeResult(400);
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
         }
     }

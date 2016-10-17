@@ -5,32 +5,36 @@ namespace ShoppingCart
 {
     public class ProductService : IProductService
     {
-        public IProductRepository Repo { get; set; }
+        private readonly IProductRepository _repo;
+        public ProductService(IProductRepository repo)
+        {
+            _repo = repo;
+        }
 
         public IList<Product> List(string filter, string sortby, bool sortDirection, int firstResult, int maxResults)
         {
-            return Repo.List(filter, sortby, sortDirection, firstResult, maxResults);
+            return _repo.List(filter, sortby, sortDirection, firstResult, maxResults);
         }
 
         public Product Get(int id)
         {
-            var product = Repo.Get(id);
+            var product = _repo.Get(id);
             return product;
         }
 
         public void Create(Product entity)
         {
-            Repo.Create(entity);
+            _repo.Create(entity);
         }
 
         public void Delete(int id)
         {
-            Repo.Delete(id);
+            _repo.Delete(id);
         }
 
         public int Count(string filter)
         {
-            return Repo.Count(filter);
+            return _repo.Count(filter);
         }
     }
 }

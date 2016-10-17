@@ -1,12 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <objects xmlns="http://www.springframework.net" xmlns:db="http://www.springframework.net/database">
-  <object id="ProductRepositoryTest" type="ShoppingCart.DAL.NHibernate.Tests.ProductRepositoryTest">
-    <property name="Sessionfactory" ref="NHibernateSessionFactory"/>
-  </object>
+  <object id="ProductRepositoryTest" type="ShoppingCart.DAL.NHibernate.Tests.ProductRepositoryTest" autowire="autodetect" singleton="true"/>
   
-  <object id="ProductRepository" type="ShoppingCart.DAL.NHibernate.ProductRepository" >
-    <property name="Sessionfactory" ref="NHibernateSessionFactory"/>
-  </object>
+  <object id="ProductRepository" type="ShoppingCart.DAL.NHibernate.ProductRepository" autowire="autodetect" singleton="true"/>
+
 
   <db:provider id="DbProvider" provider="MySql" connectionString="server=localhost;user id=root;password=alex;database=ShoppingCartTestDB;persistsecurityinfo=False" />
   <object id="NHibernateSessionFactory" type="Spring.Data.NHibernate.LocalSessionFactoryObject, Spring.Data.NHibernate4">

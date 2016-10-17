@@ -12,20 +12,21 @@ namespace ShoppingCart.DAL.NHibernate.Tests
     [TestClass]
     public class ProductRepositoryTest : AbstractTransactionalDbProviderSpringContextTests
     {
-        public static ISessionFactory Sessionfactory { get; set; }
-        public static IProductRepository ProductRepository { get; set; }
+        public  ISessionFactory Sessionfactory { get; set; }
+        public  ProductRepository ProductRepository { get; set; }
 
         private IList<Product> CreateInitialData(IEnumerable<Product> products)
         {
-            var initialList = products.ToList();
+            var initialList = products;
+            var enumerable = initialList as Product[] ?? initialList.ToArray();
             using (var session = Sessionfactory.OpenSession())
             using (var transaction = session.BeginTransaction())
             {
-                foreach (var product in initialList)
+                foreach (var product in enumerable)
                     session.Save(product);
                 transaction.Commit();
             }
-            return initialList;
+            return enumerable.ToList();
         }
 
         [TestInitialize]
@@ -39,7 +40,10 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         {
             var expected = CreateProduct("Car");
             var repository = ProductRepository;
+
             repository.Create(expected);
+            Sessionfactory.GetCurrentSession().Flush();
+
             using (var session = Sessionfactory.OpenSession())
             {
                 var actual = session.Get<Product>(expected.Id);
@@ -102,6 +106,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
 
             repository.Delete(product.Id);
             var notExistId = product.Id + 1000;
+            Sessionfactory.GetCurrentSession().Flush();
 
             using (var session = Sessionfactory.OpenSession())
             {

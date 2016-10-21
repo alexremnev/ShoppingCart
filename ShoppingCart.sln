@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCart.DAL.NHibernate
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCart.DAL.NHibernate.Tests", "ShoppingCart.DAL.NHibernate.Tests\ShoppingCart.DAL.NHibernate.Tests.csproj", "{D6D2B744-485E-4FEE-B34D-C228FC05882A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCartWebApi", "ShoppingCartWebApi\ShoppingCartWebApi.csproj", "{AD96890F-77EC-4F36-A0DE-CA35CF8551F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCartWebApi.Tests", "ShoppingCartWebApi.Tests\ShoppingCartWebApi.Tests.csproj", "{186F7190-75E7-4FC1-90E7-AA41CC0FDF89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{D6D2B744-485E-4FEE-B34D-C228FC05882A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6D2B744-485E-4FEE-B34D-C228FC05882A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6D2B744-485E-4FEE-B34D-C228FC05882A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD96890F-77EC-4F36-A0DE-CA35CF8551F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD96890F-77EC-4F36-A0DE-CA35CF8551F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD96890F-77EC-4F36-A0DE-CA35CF8551F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD96890F-77EC-4F36-A0DE-CA35CF8551F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{186F7190-75E7-4FC1-90E7-AA41CC0FDF89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{186F7190-75E7-4FC1-90E7-AA41CC0FDF89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{186F7190-75E7-4FC1-90E7-AA41CC0FDF89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{186F7190-75E7-4FC1-90E7-AA41CC0FDF89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -23,19 +23,55 @@ namespace ShoppingCart.Tests
             new Product {Id = 5, Name = "Apple anotherType", Quantity = 5, Price = 37},
             new Product {Id = 5, Name = "apple", Quantity = 25, Price = 40}
         };
-            var expected = (new { products = list, count = list.Count }).ToString();
+            var expected = list;
             var mock = new Mock<IProductService>();
             mock.Setup(m => m.Count(null)).Returns(list.Count);
             mock.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
             var controller = new ProductController(mock.Object);
 
             //Act
-            var jsonResult = controller.List(null, null, true, 0, 5) as JsonResult;
+            var jsonResult = controller.List(null, null, true, 1, 5) as JsonResult;
             Assert.IsNotNull(jsonResult);
-            var actual = jsonResult.Data.ToString();
+            var actual = jsonResult.Data as IList<Product>;
 
             //Assert
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Can_get_list_with_incorect_page()
+        {
+            //Arrange
+            const int count = 5;
+            var mock = new Mock<IProductService>();
+            mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
+            var controller = new ProductController(mock.Object);
+            var listIncorrectPageList = new List<int> { -100, -1, 0 };
+            //Act
+            foreach (var incorrectPage in listIncorrectPageList)
+            {
+                controller.List(null, null, null, incorrectPage, 5);
+                //Assert
+                mock.Verify(ps => ps.List(null, null, true, 0, 5));
+            }
+        }
+
+        [TestMethod]
+        public void Can_get_list_with_incorect_pageSize()
+        {
+            //Arrange
+            const int count = 5;
+            var mock = new Mock<IProductService>();
+            mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
+            var controller = new ProductController(mock.Object);
+            var incorrectPageSizeList = new List<int> { -1, 0, 251 };
+            //Act
+            foreach (var incorrectPageSize in incorrectPageSizeList)
+            {
+                controller.List(null, null, null, 1, incorrectPageSize);
+                //Assert
+                mock.Verify(ps => ps.List(null, null, true, 0, 50));
+            }
         }
 
         [TestMethod]
@@ -44,16 +80,17 @@ namespace ShoppingCart.Tests
             //Arrange
             var mock = new Mock<IProductService>();
             const int count = 7;
-            var expected = (new { count = count }).ToString();
+            var expected = count;
             mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
             var controller = new ProductController(mock.Object);
 
             //Act
             var jsonResult = controller.Count(null) as JsonResult;
-            Assert.IsNotNull(jsonResult);
-            var actual = jsonResult.Data.ToString();
 
             //Assert
+            Assert.IsNotNull(jsonResult);
+            var actual = jsonResult.Data;
+            Assert.IsInstanceOfType(actual, typeof(int));
             Assert.AreEqual(expected, actual);
         }
 
@@ -138,7 +175,7 @@ namespace ShoppingCart.Tests
             //Arrange
             const int id = -5;
             var mock = new Mock<IProductService>();
-            var expected = (int)HttpStatusCode.NotFound;
+            var expected = (int)HttpStatusCode.BadRequest;
             mock.Setup(m => m.Delete(It.IsAny<int>()));
             var controller = new ProductController(mock.Object);
 
@@ -149,16 +186,5 @@ namespace ShoppingCart.Tests
             //Assert
             Assert.AreEqual(expected, actual.StatusCode);
         }
-
-        private static void CompareProducts(Product expected, Product actual)
-        {
-            Assert.AreEqual(expected.Id, actual.Id);
-            Assert.AreEqual(expected.Name, actual.Name);
-            Assert.AreEqual(expected.Price, actual.Price);
-            Assert.AreEqual(expected.Quantity, actual.Quantity);
-        }
-
-
-
     }
 }

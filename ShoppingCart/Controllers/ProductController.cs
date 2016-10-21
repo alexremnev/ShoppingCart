@@ -12,7 +12,7 @@ namespace ShoppingCart.Controllers
     public class ProductController : Controller
     {
         private static readonly ILog Log = LogManager.GetLogger<ProductController>();
-        private const int DefaultPageResult = 0;
+        private const int DefaultPageResult = 1;
         private const int DefaultMaxResult = 50;
         private const bool DefaultSortDirection = true;
         private readonly IProductService _productService;
@@ -24,22 +24,21 @@ namespace ShoppingCart.Controllers
 
         [HttpGet]
         [Route]
-        public ActionResult List(string filter, string sortby, bool? sortDirection, int? pageResult, int? maxResults)
+        public ActionResult List(string filter, string sortby, bool? sortDirection, int? page, int? pageSize)
         {
             try
             {
                 sortDirection = sortDirection ?? DefaultSortDirection;
-                pageResult = pageResult ?? DefaultPageResult;
-                pageResult = pageResult < 0 ? DefaultPageResult : pageResult;
-                maxResults = maxResults ?? DefaultMaxResult;
-                maxResults = maxResults > 250 ? DefaultMaxResult : maxResults;
-                maxResults = maxResults <= 0 ? DefaultMaxResult : maxResults;
-                var firstResult = pageResult * maxResults;
+                page = page ?? DefaultPageResult;
+                page = page < 1 ? DefaultPageResult : page;
+                pageSize = pageSize ?? DefaultMaxResult;
+                pageSize = pageSize > 250 ? DefaultMaxResult : pageSize;
+                pageSize = pageSize <= 0 ? DefaultMaxResult : pageSize;
+                var firstResult = (page - 1) * pageSize;
                 IList<Product> products = null;
                 var count = _productService.Count(filter);
-                if (count != 0) products = _productService.List(filter, sortby, sortDirection.Value, firstResult.Value, maxResults.Value);
-                var productsAndCount = new { products, count };
-                return Json(productsAndCount, JsonRequestBehavior.AllowGet);
+                if (count != 0) products = _productService.List(filter, sortby, sortDirection.Value, firstResult.Value, pageSize.Value);
+                return Json(products, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
@@ -54,7 +53,7 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                var count = new { count = _productService.Count(filter) };
+                var count = _productService.Count(filter);
                 return Json(count, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
@@ -104,14 +103,14 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                if (id < 0) return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+                if (id < 0) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 _productService.Delete(id);
                 return new HttpStatusCodeResult(HttpStatusCode.NoContent);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occured when you tried to delete the product by id", e);
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
     }

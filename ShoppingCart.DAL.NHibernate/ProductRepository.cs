@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Common.Logging;
 using NHibernate;
+using Spring.Data.NHibernate;
+using Spring.Transaction.Interceptor;
 
 namespace ShoppingCart.DAL.NHibernate
 {
@@ -22,7 +24,7 @@ namespace ShoppingCart.DAL.NHibernate
                 {"price", p => p.Price},
                 {"quantity", p => p.Quantity}
             };
-
+        [Transaction]
         public void Create(Product entity)
         {
             if (entity == null) throw new RepositoryException("Name is null");
@@ -36,6 +38,7 @@ namespace ShoppingCart.DAL.NHibernate
                     {
                         session.Save(entity);
                         transaction.Commit();
+
                     }
                     catch (Exception e)
                     {
@@ -52,13 +55,15 @@ namespace ShoppingCart.DAL.NHibernate
                     }
                 }
             }
+            //HibernateTemplate ht = new HibernateTemplate(Sessionfactory);
+            //ht.Save(entity);
         }
 
         public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50)
         {
 
             if (firstResult < 0) firstResult = DefaultFirstResult;
-            if (maxResults < 0) maxResults = DefaultMaxResult;
+            if (maxResults < 0) maxResults = Count(filter);
             if (maxResults == 0) return new List<Product>();
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
@@ -120,7 +125,7 @@ namespace ShoppingCart.DAL.NHibernate
                 }
             }
         }
-
+        [Transaction]
         public void Delete(int id)
         {
             var product = Get(id);
@@ -135,6 +140,7 @@ namespace ShoppingCart.DAL.NHibernate
                     {
                         session.Delete(product);
                         transaction.Commit();
+
                     }
                     catch (Exception e)
                     {

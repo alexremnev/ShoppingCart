@@ -165,8 +165,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="IProductService.cs" />
-    <Compile Include="ProductService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +198,10 @@
     <ProjectReference Include="..\ShoppingCart.DAL\ShoppingCart.DAL.csproj">
       <Project>{257866B1-BE92-48B0-ABE0-19EADD5470E6}</Project>
       <Name>ShoppingCart.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShoppingCart.ProductService\ShoppingCart.ProductService.csproj">
+      <Project>{1b9c6eef-ef99-42ae-8e07-17d6a8f2c4c8}</Project>
+      <Name>ShoppingCart.ProductService</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

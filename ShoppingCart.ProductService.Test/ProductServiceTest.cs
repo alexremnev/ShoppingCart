@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.DAL;
 
-namespace ShoppingCart.Tests
+namespace ShoppingCart.ProductService.Test
 {
     [TestClass]
     public class ProductServiceTest

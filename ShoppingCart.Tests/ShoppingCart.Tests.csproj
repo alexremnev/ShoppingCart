@@ -99,13 +99,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ProductControllerTest.cs" />
-    <Compile Include="ProductServiceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ShoppingCart.DAL\ShoppingCart.DAL.csproj">
       <Project>{257866b1-be92-48b0-abe0-19eadd5470e6}</Project>
       <Name>ShoppingCart.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShoppingCart.ProductService\ShoppingCart.ProductService.csproj">
+      <Project>{1b9c6eef-ef99-42ae-8e07-17d6a8f2c4c8}</Project>
+      <Name>ShoppingCart.ProductService</Name>
     </ProjectReference>
     <ProjectReference Include="..\ShoppingCart\ShoppingCart.csproj">
       <Project>{E1601F05-B6C9-4D07-88C9-B8E680A2BADF}</Project>

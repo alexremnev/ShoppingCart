@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using System.Web.Mvc;
+using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using ShoppingCart.Controllers;
 using ShoppingCart.DAL;
 using ShoppingCart.ProductService;
+using ShoppingCart.WebApi.Controllers;
 
-namespace ShoppingCart.Tests
+namespace ShoppingCart.WebApi.Tests
 {
     [TestClass]
     public class ProductControllerTest
@@ -17,26 +17,29 @@ namespace ShoppingCart.Tests
         {
             //Arrange
             IList<Product> list = new List<Product>
-        {
-            new Product {Id = 1, Name = "Car yellow", Quantity = 5, Price = 15000},
-            new Product {Id = 2, Name = "car blue", Quantity = 7, Price = 20000},
-            new Product {Id = 3, Name = "apple oneType", Quantity = 3, Price = 40},
-            new Product {Id = 5, Name = "Apple anotherType", Quantity = 5, Price = 37},
-            new Product {Id = 5, Name = "apple", Quantity = 25, Price = 40}
-        };
+                    {
+                        new Product {Id = 1, Name = "Car yellow", Quantity = 5, Price = 15000},
+                        new Product {Id = 2, Name = "car blue", Quantity = 7, Price = 20000},
+                        new Product {Id = 3, Name = "apple oneType", Quantity = 3, Price = 40},
+                        new Product {Id = 4, Name = "Apple anotherType", Quantity = 5, Price = 37},
+                        new Product {Id = 5, Name = "apple", Quantity = 25, Price = 40}
+                    };
             var expected = list;
+            var expectedStatusCode = HttpStatusCode.OK;
             var mock = new Mock<IProductService>();
             mock.Setup(m => m.Count(null)).Returns(list.Count);
             mock.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
             var controller = new ProductController(mock.Object);
 
             //Act
-            var jsonResult = controller.List(null, null, true, 1, 5) as JsonResult;
-            Assert.IsNotNull(jsonResult);
-            var actual = jsonResult.Data as IList<Product>;
+            var result = controller.Get(null, null, true, 1, 5);
+            Assert.IsNotNull(result);
+            var actual = result.Content.ReadAsAsync<List<Product>>().Result;
+            var actualStatusCode = result.StatusCode;
 
             //Assert
             Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expectedStatusCode, actualStatusCode);
         }
 
         [TestMethod]
@@ -51,7 +54,7 @@ namespace ShoppingCart.Tests
             //Act
             foreach (var incorrectPage in listIncorrectPageList)
             {
-                controller.List(null, null, null, incorrectPage, 5);
+                controller.Get(null, null, null, incorrectPage, 5);
                 //Assert
                 mock.Verify(ps => ps.List(null, null, true, 0, 5));
             }
@@ -69,7 +72,7 @@ namespace ShoppingCart.Tests
             //Act
             foreach (var incorrectPageSize in incorrectPageSizeList)
             {
-                controller.List(null, null, null, 1, incorrectPageSize);
+                controller.Get(null, null, null, 1, incorrectPageSize);
                 //Assert
                 mock.Verify(ps => ps.List(null, null, true, 0, 50));
             }
@@ -84,15 +87,19 @@ namespace ShoppingCart.Tests
             var expected = count;
             mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
             var controller = new ProductController(mock.Object);
+            var expectedStatusCode = HttpStatusCode.OK;
 
             //Act
-            var jsonResult = controller.Count(null) as JsonResult;
+            var result = controller.Count(null);
 
             //Assert
-            Assert.IsNotNull(jsonResult);
-            var actual = jsonResult.Data;
+            Assert.IsNotNull(result);
+            var actual = result.Content.ReadAsAsync<int>().Result;
+            var actualStatusCode = result.StatusCode;
             Assert.IsInstanceOfType(actual, typeof(int));
             Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expectedStatusCode, actualStatusCode);
+            mock.Verify(ps => ps.Count(null));
         }
 
         [TestMethod]
@@ -104,14 +111,16 @@ namespace ShoppingCart.Tests
             var expected = new Product { Id = id, Name = "Car yellow", Quantity = 5, Price = 15000 };
             mock.Setup(m => m.Get(id)).Returns(expected);
             var controller = new ProductController(mock.Object);
-
+            var expectedStatusCode = HttpStatusCode.OK;
             //Act
-            var jsonResult = controller.Get(id) as JsonResult;
-            Assert.IsNotNull(jsonResult);
-            var actual = jsonResult.Data as Product;
+            var result = controller.Get(id);
+            Assert.IsNotNull(result);
+            var actual = result.Content.ReadAsAsync<Product>().Result;
+            var actualStatusCode = result.StatusCode;
 
             //Assert
             Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expectedStatusCode, actualStatusCode);
         }
 
         [TestMethod]
@@ -120,17 +129,17 @@ namespace ShoppingCart.Tests
             //Arrange
             var notExistIds = new List<int> { -1, -2, -100, 7, 8, 100 };
             var mock = new Mock<IProductService>();
-            var expected = (int)HttpStatusCode.NotFound;
+            var expected = HttpStatusCode.NotFound;
             mock.Setup(m => m.Get(It.IsAny<int>())).Returns((Product)null);
             var controller = new ProductController(mock.Object);
 
             //Act
             foreach (var notExistId in notExistIds)
             {
-                var actual = controller.Get(notExistId) as HttpStatusCodeResult;
+                var actual = controller.Get(notExistId).StatusCode;
                 //Assert
                 Assert.IsNotNull(actual);
-                Assert.AreEqual(expected, actual.StatusCode);
+                Assert.AreEqual(expected, actual);
             }
         }
 
@@ -140,12 +149,12 @@ namespace ShoppingCart.Tests
             //Arrange
             var product = new Product { Name = "Car yellow", Quantity = 5, Price = 15000 };
             var mock = new Mock<IProductService>();
-            var expected = (int)HttpStatusCode.Created;
+            var expected = HttpStatusCode.Created;
             mock.Setup(m => m.Create(product));
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Create(product);
+            var actual = controller.Post(product);
             Assert.IsNotNull(actual);
 
             //Assert
@@ -158,7 +167,7 @@ namespace ShoppingCart.Tests
             //Arrange
             const int id = 5;
             var mock = new Mock<IProductService>();
-            var expected = (int)HttpStatusCode.NoContent;
+            var expected = HttpStatusCode.NoContent;
             mock.Setup(m => m.Delete(It.IsAny<int>()));
             var controller = new ProductController(mock.Object);
 
@@ -176,7 +185,7 @@ namespace ShoppingCart.Tests
             //Arrange
             const int id = -5;
             var mock = new Mock<IProductService>();
-            var expected = (int)HttpStatusCode.BadRequest;
+            var expected = HttpStatusCode.BadRequest;
             mock.Setup(m => m.Delete(It.IsAny<int>()));
             var controller = new ProductController(mock.Object);
 
@@ -189,3 +198,4 @@ namespace ShoppingCart.Tests
         }
     }
 }
+

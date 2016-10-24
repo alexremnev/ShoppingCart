@@ -4,6 +4,7 @@ using System.Net;
 using System.Web.Mvc;
 using Common.Logging;
 using ShoppingCart.DAL;
+using ShoppingCart.ProductService;
 
 
 namespace ShoppingCart.Controllers
@@ -76,7 +77,7 @@ namespace ShoppingCart.Controllers
             }
             catch (Exception e)
             {
-                Log.Error("Exception occured when you tried to get the product by id", e);
+                Log.Error($"Exception occured when you tried to get the product by id={id}", e);
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }

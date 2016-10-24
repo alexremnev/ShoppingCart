@@ -7,17 +7,18 @@ using System.Web.Routing;
 using System.Web.Security;
 using System.Web.SessionState;
 using System.Web.Http;
+using Spring.Web.Mvc;
 
-namespace ShoppingCartWebApi
+namespace ShoppingCart.WebApi
 {
-    public class Global : HttpApplication
+    public class Global : SpringMvcApplication
     {
         void Application_Start(object sender, EventArgs e)
         {
-            // Code that runs on application startup
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);            
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            ValueProviderFactories.Factories.Add(new JsonValueProviderFactory());
         }
     }
 }

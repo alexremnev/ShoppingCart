@@ -13,8 +13,7 @@ namespace ShoppingCart.DAL.NHibernate
         public ISessionFactory Sessionfactory { get; set; }
 
         private const int DefaultFirstResult = 0;
-        private const int DefaultMaxResult = 50;
-        private const string DefaultSortby = "id";
+       private const string DefaultSortby = "id";
         private const int MaxNameLength = 50;
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
         private static readonly IDictionary<string, Expression<Func<Product, object>>> OrderByFuncs = new Dictionary
@@ -30,33 +29,9 @@ namespace ShoppingCart.DAL.NHibernate
             if (entity == null) throw new RepositoryException("Name is null");
             if (entity.Name.Length > MaxNameLength)
                 throw new RepositoryException($"Name consists of more than {MaxNameLength} letters");
-            using (var session = Sessionfactory.OpenSession())
-            {
-                using (var transaction = session.BeginTransaction())
-                {
-                    try
-                    {
-                        session.Save(entity);
-                        transaction.Commit();
-
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error($"Exception occured when system tried save the product ={entity}", e);
-                        try
-                        {
-                            transaction.Rollback();
-                        }
-                        catch (HibernateException exception)
-                        {
-                            Log.Error("Exception occurred when system tried to roll back transaction", exception);
-                        }
-                        throw;
-                    }
-                }
-            }
-            //HibernateTemplate ht = new HibernateTemplate(Sessionfactory);
-            //ht.Save(entity);
+            
+            var ht = new HibernateTemplate(Sessionfactory);
+            ht.Save(entity);
         }
 
         public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50)

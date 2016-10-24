@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ShoppingCart.DAL;
 
-namespace ShoppingCart
+namespace ShoppingCart.ProductService
 {
     public interface IProductService
     {

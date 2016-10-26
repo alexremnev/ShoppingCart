@@ -13,9 +13,10 @@ namespace ShoppingCart.DAL.NHibernate
         public ISessionFactory Sessionfactory { get; set; }
 
         private const int DefaultFirstResult = 0;
-       private const string DefaultSortby = "id";
+        private const string DefaultSortby = "id";
         private const int MaxNameLength = 50;
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
+
         private static readonly IDictionary<string, Expression<Func<Product, object>>> OrderByFuncs = new Dictionary
             <string, Expression<Func<Product, object>>>
             {
@@ -23,18 +24,21 @@ namespace ShoppingCart.DAL.NHibernate
                 {"price", p => p.Price},
                 {"quantity", p => p.Quantity}
             };
+
         [Transaction]
         public void Create(Product entity)
         {
-            if (entity == null) throw new RepositoryException("Name is null");
+            if (entity == null) throw new RepositoryException("Entity is null");
             if (entity.Name.Length > MaxNameLength)
-                throw new RepositoryException($"Name consists of more than {MaxNameLength} letters");
-            
+                throw new ValidationException($"Name consists of more than {MaxNameLength} letters");
+
+            if (!IsUnique(entity.Name))  throw new ValidationException("Name is not unique");
             var ht = new HibernateTemplate(Sessionfactory);
             ht.Save(entity);
         }
 
-        public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50)
+        public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true,
+            int firstResult = 0, int maxResults = 50)
         {
 
             if (firstResult < 0) firstResult = DefaultFirstResult;
@@ -84,6 +88,30 @@ namespace ShoppingCart.DAL.NHibernate
             }
         }
 
+        [Transaction]
+        public bool Update(int id, Product entity)
+        {
+            if ((id < 0) || (entity == null))
+            {
+                Log.Error("Entity or id is not valid");
+                throw new RepositoryException("Entity or id is not valid");
+            }
+
+            var product = Get(id);
+            if (product == null) return false;
+            if (!IsUnique(entity.Name)) throw new ValidationException("Name is not unique");
+            var ht = new HibernateTemplate(Sessionfactory);
+            var productName = entity.Name;
+            var productPrice = entity.Price;
+            var productQuantity = entity.Quantity;
+
+            if (productPrice != 0) product.Price = productPrice;
+            if (productName != null) product.Name = productName;
+            if (productQuantity != 0) product.Quantity = productQuantity;
+            ht.Update(product);
+            return true;
+        }
+
         public Product Get(int id)
         {
             using (var session = Sessionfactory.OpenSession())
@@ -100,6 +128,7 @@ namespace ShoppingCart.DAL.NHibernate
                 }
             }
         }
+
         [Transaction]
         public void Delete(int id)
         {
@@ -133,6 +162,7 @@ namespace ShoppingCart.DAL.NHibernate
                 }
             }
         }
+
         private static void SetUpFilter(string filter, IQueryOver<Product, Product> query)
         {
             if (!string.IsNullOrEmpty(filter))
@@ -142,5 +172,25 @@ namespace ShoppingCart.DAL.NHibernate
                     .IsInsensitiveLike($"%{filter}%");
             }
         }
+
+        private bool IsUnique(string name)
+        {
+            int count;
+            using (var session = Sessionfactory.OpenSession())
+            {
+                try
+                {
+                    count = session.QueryOver<Product>().Where(s => s.Name == name).RowCount();
+                }
+                catch (Exception e)
+                {
+                    Log.Error(
+                        "Exception occured when system tried to check the name on uniqueness", e);
+                    throw;
+                }
+            }
+            return count < 1;
+        }
     }
 }
+

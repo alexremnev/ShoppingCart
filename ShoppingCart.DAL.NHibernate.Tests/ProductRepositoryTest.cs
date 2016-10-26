@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
 using Common.Logging;
 using NHibernate;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NHibernate.Transaction;
 using Spring.Testing.Microsoft;
 
 namespace ShoppingCart.DAL.NHibernate.Tests
@@ -56,11 +54,23 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(RepositoryException))]
+        [ExpectedException(typeof(ValidationException))]
         public void Can_create_new_product_with_longname()
         {
             var repository = ProductRepository;
             repository.Create(CreateProduct(GenerateName(50)));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ValidationException))]
+        public void Can_create_product_with_not_unique_name()
+        {
+            var product = CreateProduct("Car", 5, 15000);
+            CreateInitialData(new List<Product> { product });
+            var repository = ProductRepository;
+            var notUniqueName = product.Name;
+
+            repository.Create(new Product {Name = notUniqueName});
         }
 
         [TestMethod]
@@ -86,6 +96,74 @@ namespace ShoppingCart.DAL.NHibernate.Tests
                 CompareProducts(expected, actual);
             }
             Assert.IsNull(repository.Get(notExistId));
+        }
+
+        [TestMethod]
+        public void Can_update_product()
+        {
+            var product = CreateProduct("Car yellow", 5, 15000);
+            CreateInitialData(new List<Product> { product });
+            var expected = CreateProduct("Car blue", 3, 20000);
+            var repository = ProductRepository;
+
+            var isCreate = repository.Update(product.Id, expected);
+
+            Sessionfactory.GetCurrentSession().Transaction.Commit();
+            Sessionfactory.GetCurrentSession().Flush();
+            using (var session = Sessionfactory.OpenSession())
+            {
+                var actual = session.Get<Product>(product.Id);
+                Assert.AreEqual(expected.Name, actual.Name);
+                Assert.AreEqual(expected.Quantity, actual.Quantity);
+                Assert.AreEqual(expected.Price, actual.Price);
+                Assert.IsTrue(isCreate);
+            }
+        }
+
+        [TestMethod]
+        public void Can_update_not_exist_id()
+        {
+            var product = CreateProduct("Car yellow", 5, 15000);
+            CreateInitialData(new List<Product> { product });
+            var repository = ProductRepository;
+            var notExistId = product.Id + 1000;
+
+            var isUpdate = repository.Update(notExistId, product);
+
+            Assert.IsFalse(isUpdate);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ValidationException))]
+        public void Can_update_product_with_not_unique_name()
+        {
+            var product = CreateProduct("Car", 5, 15000);
+            CreateInitialData(new List<Product> { product });
+            var repository = ProductRepository;
+            var notUniqueName = product.Name;
+
+            repository.Update(product.Id, new Product { Name = notUniqueName });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(RepositoryException))]
+        public void Can_update_product_with_wrong_id()
+        {
+            var product = CreateProduct("Car yellow", 5, 15000);
+            const int wrongId = -1;
+            var repository = ProductRepository;
+
+            repository.Update(wrongId, product);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(RepositoryException))]
+        public void Can_update_product_with_wrong_entity()
+        {
+            const int wrongId = 1;
+            var repository = ProductRepository;
+
+            repository.Update(wrongId, null);
         }
 
         [TestMethod]
@@ -333,6 +411,10 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             return new Product { Name = name, Quantity = quantity, Price = price };
         }
 
-        protected override string[] ConfigLocations => new[] { "assembly://ShoppingCart.DAL.NHibernate.Tests/ShoppingCart.DAL.NHibernate.Tests/DI.xml" };
+        protected override string[] ConfigLocations => new[]
+        {
+            "config://spring/objects",
+            "assembly://ShoppingCart.DAL.NHibernate/ShoppingCart.DAL.NHibernate/config.xml"
+        };
     }
 }

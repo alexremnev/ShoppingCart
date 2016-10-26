@@ -36,5 +36,10 @@ namespace ShoppingCart.ProductService
         {
             return _repo.Count(filter);
         }
+
+        public bool Update(int id, Product entity)
+        {
+            return _repo.Update(id,entity);
+        }
     }
 }

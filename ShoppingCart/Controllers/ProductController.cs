@@ -13,8 +13,8 @@ namespace ShoppingCart.Controllers
     public class ProductController : Controller
     {
         private static readonly ILog Log = LogManager.GetLogger<ProductController>();
-        private const int DefaultPageResult = 1;
-        private const int DefaultMaxResult = 50;
+        private const int StartPointPage = 1;
+        private const int MaxPageSize = 50;
         private const bool DefaultSortDirection = true;
         private readonly IProductService _productService;
 
@@ -30,11 +30,11 @@ namespace ShoppingCart.Controllers
             try
             {
                 sortDirection = sortDirection ?? DefaultSortDirection;
-                page = page ?? DefaultPageResult;
-                page = page < 1 ? DefaultPageResult : page;
-                pageSize = pageSize ?? DefaultMaxResult;
-                pageSize = pageSize > 250 ? DefaultMaxResult : pageSize;
-                pageSize = pageSize <= 0 ? DefaultMaxResult : pageSize;
+                page = page ?? StartPointPage;
+                page = page < 1 ? StartPointPage : page;
+                pageSize = pageSize ?? MaxPageSize;
+                pageSize = pageSize > 250 ? MaxPageSize : pageSize;
+                pageSize = pageSize <= 0 ? MaxPageSize : pageSize;
                 var firstResult = (page - 1) * pageSize;
                 IList<Product> products = null;
                 var count = _productService.Count(filter);

@@ -79,5 +79,19 @@ namespace ShoppingCart.ProductService.Test
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        public void Can_update_product()
+        {
+            const int id = 1;
+            var product = new Product() {Name = "name"};
+            var mock = new Mock<IProductRepository>();
+            mock.Setup(m => m.Update(id, product)).Returns(true);
+            var service = new ProductService(mock.Object);
+
+
+            var actual = service.Update(id,product);
+            Assert.IsTrue(actual);
+        }
+
     }
 }

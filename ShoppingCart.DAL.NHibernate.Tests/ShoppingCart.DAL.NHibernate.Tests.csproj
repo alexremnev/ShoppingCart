@@ -103,13 +103,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="AssertException.cs" />
     <Compile Include="ProductRepositoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.config" />
-    <EmbeddedResource Include="DI.xml" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

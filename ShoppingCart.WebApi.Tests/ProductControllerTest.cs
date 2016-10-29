@@ -5,8 +5,8 @@ using System.Text;
 using System.Web.Http.Results;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using ShoppingCart.Business;
 using ShoppingCart.DAL;
-using ShoppingCart.ProductService;
 using ShoppingCart.WebApi.Controllers;
 
 namespace ShoppingCart.WebApi.Tests
@@ -32,7 +32,7 @@ namespace ShoppingCart.WebApi.Tests
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Get(null, null, true, 1, 5) as OkNegotiatedContentResult<IList<Product>>;
+            var actual = controller.List(null, null, true, 0, 5) as OkNegotiatedContentResult<IList<Product>>;
 
             //Assert
             Assert.IsNotNull(actual);
@@ -49,7 +49,7 @@ namespace ShoppingCart.WebApi.Tests
             //Act
             foreach (var incorrectPage in listIncorrectPageList)
             {
-                controller.Get(null, null, null, incorrectPage, 5);
+                controller.List(null, null, null, incorrectPage, 5);
                 //Assert
                 mock.Verify(ps => ps.List(null, null, true, 0, 5));
             }
@@ -65,7 +65,7 @@ namespace ShoppingCart.WebApi.Tests
             //Act
             foreach (var incorrectPageSize in incorrectPageSizeList)
             {
-                controller.Get(null, null, null, 1, incorrectPageSize);
+                controller.List(null, null, null, 1, incorrectPageSize);
                 //Assert
                 mock.Verify(ps => ps.List(null, null, true, 0, 50));
             }
@@ -81,7 +81,7 @@ namespace ShoppingCart.WebApi.Tests
             const string notExistentFilter = "notExistentFilter";
 
             //Act
-            var actual = controller.Get(notExistentFilter, null, true, 1, 5) as OkNegotiatedContentResult<IList<Product>>;
+            var actual = controller.List(notExistentFilter, null, true, 1, 5) as OkNegotiatedContentResult<IList<Product>>;
 
             //Assert
             Assert.IsNotNull(actual);
@@ -98,7 +98,7 @@ namespace ShoppingCart.WebApi.Tests
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Count(null) as OkNegotiatedContentResult<int>;
+            var actual = controller.Count() as OkNegotiatedContentResult<int>;
 
             //Assert
             Assert.IsNotNull(actual);
@@ -117,7 +117,7 @@ namespace ShoppingCart.WebApi.Tests
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Get(id) as OkNegotiatedContentResult<Product>;
+            var actual = controller.GetById(id) as OkNegotiatedContentResult<Product>;
             Assert.IsNotNull(actual);
 
             //Assert
@@ -136,7 +136,7 @@ namespace ShoppingCart.WebApi.Tests
             //Act
             foreach (var notExistId in notExistIds)
             {
-                var actual = controller.Get(notExistId);
+                var actual = controller.GetById(notExistId);
                 //Assert
                 Assert.IsNotNull(actual);
                 Assert.IsInstanceOfType(actual, typeof(NotFoundResult));
@@ -155,7 +155,7 @@ namespace ShoppingCart.WebApi.Tests
             //Act
             foreach (var id in negativeId)
             {
-                var actual = controller.Get(id);
+                var actual = controller.GetById(id);
                 //Assert
                 Assert.IsNotNull(actual);
                 Assert.IsInstanceOfType(actual, typeof(BadRequestResult));
@@ -166,20 +166,53 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_create_product()
         {
             //Arrange
-            var product = new Product { Name = "Car yellow", Quantity = 5, Price = 15000 };
+            var product = new Product { Id = 3, Name = "Car red", Quantity = 5, Price = 15000 };
             var expected = product.Id;
-            var expectedLocation = new Uri($"http://localhost:50896/api/product/{expected}");
+            var expectedRouteName = "DefaultApi";
+            var expectedContent = product.Id;
+            var expectedRouteValue = product.Id;
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.Create(product));
+            mock.Setup(m => m.GetByName(product.Name)).Returns(new List<Product>());
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Post(product) as CreatedNegotiatedContentResult<int>;
-            
+            var actual = controller.Create(product) as CreatedAtRouteNegotiatedContentResult<int>;
+
             //Assert
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected, actual.Content);
-            Assert.AreEqual(expectedLocation, actual.Location);
+            Assert.AreEqual(expectedRouteName, actual.RouteName);
+            Assert.AreEqual(expectedContent, actual.Content);
+            Assert.AreEqual(expectedRouteValue, actual.RouteValues["id"]);
+        }
+
+        [TestMethod]
+        public void Can_create_product_null_entity()
+        {
+            //Arrange
+            const string expected = "Entity is not valid";
+            var mock = new Mock<IProductService>();
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Create(null) as BadRequestErrorMessageResult;
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.Message);
+        }
+
+        [TestMethod]
+        public void Can_create_product_with_empty_name()
+        {
+            //Arrange
+            var product = new Product { Name = "", Quantity = 5, Price = 15000 };
+            const string expected = "Name is empty";
+            var mock = new Mock<IProductService>();
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Create(product) as BadRequestErrorMessageResult;
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.Message);
         }
 
         [TestMethod]
@@ -187,99 +220,191 @@ namespace ShoppingCart.WebApi.Tests
         {
             //Arrange
             var product = new Product { Name = GenerateName(50), Quantity = 5, Price = 15000 };
+            const string expected = "Name consists of more than 50 letters";
             var mock = new Mock<IProductService>();
-            var exception = new ValidationException("Name consists of more than 50 letters");
-            mock.Setup(m => m.Create(product)).Throws(exception);
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Post(product) as BadRequestErrorMessageResult;
+            var actual = controller.Create(product) as BadRequestErrorMessageResult;
             Assert.IsNotNull(actual);
-            Assert.AreEqual(exception.Message, actual.Message);
+            Assert.AreEqual(expected, actual.Message);
         }
 
         [TestMethod]
         public void Can_create_product_with_not_unique_name()
         {
             //Arrange
-            var product = new Product {Name = "Car"};
+            var list = new List<Product> { new Product { Name = "Car" } };
+            var product = new Product { Name = "Car" };
+            const string expected = "Name is not unique";
             var mock = new Mock<IProductService>();
-            var exception = new ValidationException("Name is not unique");
-            mock.Setup(m => m.Create(product)).Throws(exception);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(list);
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Post(product) as BadRequestErrorMessageResult;
+            var actual = controller.Create(product) as BadRequestErrorMessageResult;
             Assert.IsNotNull(actual);
-            Assert.AreEqual(exception.Message, actual.Message);
+            Assert.AreEqual(expected, actual.Message);
+        }
+
+        [TestMethod]
+        public void Can_create_product_with_exception()
+        {
+            //Arrange
+            var product = new Product { Name = "Car" };
+            var mock = new Mock<IProductService>();
+            mock.Setup(m => m.GetByName(product.Name)).Throws(new Exception());
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Create(product) as InternalServerErrorResult;
+            Assert.IsNotNull(actual);
+
         }
 
         [TestMethod]
         public void Can_update_product()
         {
             //Arrange
-            const int id = 5;
-            var product = new Product() { Name = "Car yellow", Quantity = 5, Price = 15000 };
+            var product = new Product() { Id = 5, Name = "Car yellow", Quantity = 5, Price = 15000 };
             var mock = new Mock<IProductService>();
             var expected = HttpStatusCode.NoContent;
-            mock.Setup(m => m.Update(id,product)).Returns(true);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(new List<Product>());
+            mock.Setup(m => m.Update(product));
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Put(id,product) as StatusCodeResult;
-            
+            var actual = controller.Update(product) as StatusCodeResult;
+
             //Assert
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected, actual.StatusCode);
         }
 
         [TestMethod]
-        public void Can_update_product_with_negative_id()
+        public void Can_update_product_with_not_unique_name_but_same_id()
         {
             //Arrange
-            const int id = -5;
-            var product = new Product() { Name = "Car yellow", Quantity = 5, Price = 15000 };
+            var expected = HttpStatusCode.NoContent;
+            var listCar = new List<Product> { new Product { Id = 5, Name = "Car" } };
+            var product = new Product { Id = 5, Name = "Car" };
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.Update(id, product)).Returns(true);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(listCar);
+            // mock.Setup(m => m.Update(product));
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Put(id, product) as BadRequestResult;
-            
+            var actual = controller.Update(product) as StatusCodeResult;
+
             //Assert
             Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.StatusCode);
         }
 
         [TestMethod]
-        public void Can_update_with_wrong_product()
+        public void Can_update_with_null_entity()
         {
             //Arrange
-            const int id = 5;
+            const string expected = "Entity is not valid";
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.Update(id, null)).Returns(false);
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Put(id, null) as BadRequestResult;
+            var actual = controller.Update(null) as BadRequestErrorMessageResult;
 
             //Assert
             Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.Message);
         }
+
+        [TestMethod]
+        public void Can_update_with_empty_name()
+        {
+            //Arrange
+            var product = new Product { Name = "", Price = 20, Quantity = 50 };
+            const string expected = "Name is empty";
+            var mock = new Mock<IProductService>();
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Update(product) as BadRequestErrorMessageResult;
+
+            //Assert
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.Message);
+        }
+
+        [TestMethod]
+        public void Can_update_product_with_long_name()
+        {
+            //Arrange
+            var product = new Product { Name = GenerateName(50), Price = 20, Quantity = 50 };
+            const string expected = "Name consists of more than 50 letters";
+            var mock = new Mock<IProductService>();
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Update(product) as BadRequestErrorMessageResult;
+
+            //Assert
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.Message);
+        }
+
 
         [TestMethod]
         public void Can_update_product_with_not_unique_name()
         {
             //Arrange
+            var listCar = new List<Product> { new Product { Name = "Car" }, new Product { Name = "Car" } };
+            const string expected = "Name is not unique";
             var product = new Product { Name = "Car" };
             var mock = new Mock<IProductService>();
-            var exception = new ValidationException("Name is not unique");
-            mock.Setup(m => m.Update(product.Id,product)).Throws(exception);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(listCar);
             var controller = new ProductController(mock.Object);
 
             //Act
-            var actual = controller.Put(product.Id,product) as BadRequestErrorMessageResult;
+            var actual = controller.Update(product) as BadRequestErrorMessageResult;
+
+            //Assert
             Assert.IsNotNull(actual);
-            Assert.AreEqual(exception.Message, actual.Message);
+            Assert.AreEqual(expected, actual.Message);
+        }
+
+        [TestMethod]
+        public void Can_update_product_with_not_unique_name_but_not_same_id()
+        {
+            //Arrange
+            var listCar = new List<Product> { new Product { Id = 3, Name = "Car" } };
+            const string expected = "Name is not unique";
+            var product = new Product { Id = 5, Name = "Car" };
+            var mock = new Mock<IProductService>();
+            mock.Setup(m => m.GetByName(product.Name)).Returns(listCar);
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Update(product) as BadRequestErrorMessageResult;
+
+            //Assert
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected, actual.Message);
+        }
+
+
+        [TestMethod]
+        public void Can_update_with_exception()
+        {
+            //Arrange
+            var product = new Product { Id = 5, Name = "Car" };
+            var mock = new Mock<IProductService>();
+            mock.Setup(m => m.GetByName(product.Name)).Throws(new Exception());
+            var controller = new ProductController(mock.Object);
+
+            //Act
+            var actual = controller.Update(product) as InternalServerErrorResult;
+
+            //Assert
+            Assert.IsNotNull(actual);
         }
 
         [TestMethod]

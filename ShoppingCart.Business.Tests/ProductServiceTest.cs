@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.DAL;
 
-namespace ShoppingCart.ProductService.Test
+namespace ShoppingCart.Business.Tests
 {
     [TestClass]
     public class ProductServiceTest
@@ -46,8 +46,7 @@ namespace ShoppingCart.ProductService.Test
         [TestMethod]
         public void Can_can_create_product()
         {
-            const int id = 7;
-            var product = new Product { Id = id, Name = "Car yellow", Quantity = 5, Price = 15000 };
+            var product = new Product { Name = "Car yellow", Quantity = 5, Price = 15000 };
             var mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Create(product));
             var service = new ProductService(mock.Object);
@@ -82,15 +81,26 @@ namespace ShoppingCart.ProductService.Test
         [TestMethod]
         public void Can_update_product()
         {
-            const int id = 1;
-            var product = new Product() {Name = "name"};
+            var product = new Product { Name = "name" };
             var mock = new Mock<IProductRepository>();
-            mock.Setup(m => m.Update(id, product)).Returns(true);
+            mock.Setup(m => m.Update(product));
             var service = new ProductService(mock.Object);
 
+            service.Update(product);
 
-            var actual = service.Update(id,product);
-            Assert.IsTrue(actual);
+        }
+
+        [TestMethod]
+        public void Get_by_name()
+        {
+            const string name = "car";
+            var expected = new List<Product> { new Product { Name = "car" }, new Product { Name = "car" } };
+            var mock = new Mock<IProductRepository>();
+            mock.Setup(m => m.GetByName(It.IsAny<string>())).Returns(expected);
+            var service = new ProductService(mock.Object);
+
+            var actual = service.GetByName(name);
+            Assert.AreEqual(expected, actual);
         }
 
     }

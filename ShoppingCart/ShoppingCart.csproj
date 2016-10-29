@@ -191,6 +191,10 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ShoppingCart.Business\ShoppingCart.Business.csproj">
+      <Project>{fb90f7ac-550e-4d9b-b530-ad13b1109d11}</Project>
+      <Name>ShoppingCart.Business</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ShoppingCart.DAL.NHibernate\ShoppingCart.DAL.NHibernate.csproj">
       <Project>{918d4204-b90d-4bb0-943e-b5c8515e9994}</Project>
       <Name>ShoppingCart.DAL.NHibernate</Name>
@@ -198,10 +202,6 @@
     <ProjectReference Include="..\ShoppingCart.DAL\ShoppingCart.DAL.csproj">
       <Project>{257866B1-BE92-48B0-ABE0-19EADD5470E6}</Project>
       <Name>ShoppingCart.DAL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ShoppingCart.ProductService\ShoppingCart.ProductService.csproj">
-      <Project>{1b9c6eef-ef99-42ae-8e07-17d6a8f2c4c8}</Project>
-      <Name>ShoppingCart.ProductService</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

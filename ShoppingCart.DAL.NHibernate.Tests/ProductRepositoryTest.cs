@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Common.Logging;
 using NHibernate;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -54,23 +53,11 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ValidationException))]
-        public void Can_create_new_product_with_longname()
+        [ExpectedException(typeof(RepositoryException))]
+        public void Can_create_product_with_null_entity()
         {
             var repository = ProductRepository;
-            repository.Create(CreateProduct(GenerateName(50)));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ValidationException))]
-        public void Can_create_product_with_not_unique_name()
-        {
-            var product = CreateProduct("Car", 5, 15000);
-            CreateInitialData(new List<Product> { product });
-            var repository = ProductRepository;
-            var notUniqueName = product.Name;
-
-            repository.Create(new Product {Name = notUniqueName});
+            repository.Create(null);
         }
 
         [TestMethod]
@@ -99,14 +86,24 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         }
 
         [TestMethod]
-        public void Can_update_product()
+        [ExpectedException(typeof(RepositoryException))]
+        public void Can_get_product_by_negative_id()
         {
-            var product = CreateProduct("Car yellow", 5, 15000);
-            CreateInitialData(new List<Product> { product });
-            var expected = CreateProduct("Car blue", 3, 20000);
+            const int id = -1;
             var repository = ProductRepository;
 
-            var isCreate = repository.Update(product.Id, expected);
+            repository.Get(id);
+        }
+
+        [TestMethod]
+        public void Can_update_product()
+        {
+            var product = new Product { Name = "Car yellow", Quantity = 5, Price = 15000 };
+            CreateInitialData(new List<Product> { product });
+            var expected = new Product { Id = product.Id, Name = "Car blue", Quantity = 3, Price = 20000 };
+            var repository = ProductRepository;
+
+            repository.Update(expected);
 
             Sessionfactory.GetCurrentSession().Transaction.Commit();
             Sessionfactory.GetCurrentSession().Flush();
@@ -116,54 +113,27 @@ namespace ShoppingCart.DAL.NHibernate.Tests
                 Assert.AreEqual(expected.Name, actual.Name);
                 Assert.AreEqual(expected.Quantity, actual.Quantity);
                 Assert.AreEqual(expected.Price, actual.Price);
-                Assert.IsTrue(isCreate);
             }
         }
 
         [TestMethod]
-        public void Can_update_not_exist_id()
+        [ExpectedException(typeof(RepositoryException))]
+        public void Can_update_product_with_null_entity()
         {
-            var product = CreateProduct("Car yellow", 5, 15000);
-            CreateInitialData(new List<Product> { product });
+
             var repository = ProductRepository;
-            var notExistId = product.Id + 1000;
 
-            var isUpdate = repository.Update(notExistId, product);
-
-            Assert.IsFalse(isUpdate);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ValidationException))]
-        public void Can_update_product_with_not_unique_name()
-        {
-            var product = CreateProduct("Car", 5, 15000);
-            CreateInitialData(new List<Product> { product });
-            var repository = ProductRepository;
-            var notUniqueName = product.Name;
-
-            repository.Update(product.Id, new Product { Name = notUniqueName });
+            repository.Update(null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(RepositoryException))]
-        public void Can_update_product_with_wrong_id()
+        public void Can_update_product_with_not_exist()
         {
-            var product = CreateProduct("Car yellow", 5, 15000);
-            const int wrongId = -1;
+            var product = new Product { Id = 10000, Name = "Car" };
             var repository = ProductRepository;
 
-            repository.Update(wrongId, product);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(RepositoryException))]
-        public void Can_update_product_with_wrong_entity()
-        {
-            const int wrongId = 1;
-            var repository = ProductRepository;
-
-            repository.Update(wrongId, null);
+            repository.Update(product);
         }
 
         [TestMethod]
@@ -343,14 +313,17 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             AssertList(expected, repository.List(null, null, true, 0, -3));
         }
 
-        private static string GenerateName(int number)
+        [TestMethod]
+        public void Can_get_list_by_name()
         {
-            var name = new StringBuilder();
-            for (var i = 0; i <= number; i++)
-            {
-                name.Append('a');
-            }
-            return name.ToString();
+            var name = "Car";
+            var list = new List<Product> { new Product { Name = "Car" }, new Product { Name = "Car" } };
+            CreateInitialData(list);
+            var expected = list;
+            var repository = ProductRepository;
+            var actual = repository.GetByName(name);
+
+            AssertList(expected, actual);
         }
 
         private static void AssertList(IList<Product> expectedList, IList<Product> actualList)

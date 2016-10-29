@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Web.Mvc;
 using Common.Logging;
+using ShoppingCart.Business;
 using ShoppingCart.DAL;
-using ShoppingCart.ProductService;
 
 
 namespace ShoppingCart.Controllers

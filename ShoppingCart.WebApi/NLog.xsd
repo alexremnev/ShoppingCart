@@ -2088,7 +2088,7 @@
       <xs:enumeration value="CounterDelta64" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="PostFilteringWrapper">
+  <xs:complexType name="CreateFilteringWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2288,7 +2288,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="Soap11" />
       <xs:enumeration value="Soap12" />
-      <xs:enumeration value="HttpPost" />
+      <xs:enumeration value="HttpCreate" />
       <xs:enumeration value="HttpGet" />
     </xs:restriction>
   </xs:simpleType>

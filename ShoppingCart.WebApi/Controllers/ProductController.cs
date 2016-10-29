@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Web.Http;
 using Common.Logging;
+using ShoppingCart.Business;
 using ShoppingCart.DAL;
-using ShoppingCart.ProductService;
 
 namespace ShoppingCart.WebApi.Controllers
 {
@@ -21,11 +21,11 @@ namespace ShoppingCart.WebApi.Controllers
             _productService = productService;
         }
 
-        // GET api/product/{filter}/{srotby}/{sortDirection}/{page}/{pageSize}
+        // GET api/product/list
         [HttpGet]
-        public IHttpActionResult Get(string filter, string sortby, bool? sortDirection, int? page, int? pageSize)
+        [Route("api/product")]
+        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = StartPointPage, int? pageSize = MaxPageSize)
         {
-            Log.Fatal("Hello Log");
             try
             {
                 sortDirection = sortDirection ?? DefaultSortDirection;
@@ -36,7 +36,6 @@ namespace ShoppingCart.WebApi.Controllers
                 pageSize = pageSize <= 0 ? MaxPageSize : pageSize;
                 var firstResult = (page - 1) * pageSize;
                 var products = _productService.List(filter, sortby, sortDirection.Value, firstResult.Value, pageSize.Value);
-                products = products ?? new List<Product>();
                 return Ok(products);
             }
             catch (Exception e)
@@ -46,9 +45,9 @@ namespace ShoppingCart.WebApi.Controllers
             }
         }
 
-        // GET api/product/count/{filer}
+        // GET api/product/count/
         [HttpGet]
-        public IHttpActionResult Count(string filter)
+        public IHttpActionResult Count(string filter = null)
         {
             try
             {
@@ -63,7 +62,8 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         // GET api/product/id
-        public IHttpActionResult Get(int id)
+        [HttpGet]
+        public IHttpActionResult GetById(int id)
         {
             try
             {
@@ -79,22 +79,20 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         // POST api/product
-        public IHttpActionResult Post([FromBody]Product entity)
+        [HttpPost]
+        [Route("api/product")]
+        public IHttpActionResult Create([FromBody]Product entity)
         {
+
             try
             {
-                if (entity == null) return BadRequest();
-                // if (entity.Name.Length > 50) BadRequest("Name consists of more than 50 letters");//todo second variant;
-                // if (entity.Name.Length > 50) throw ValidationException("Name consists of more than 50 letters");//todo third variant;
+                if (entity == null) return BadRequest("Entity is not valid");
+                if (string.IsNullOrEmpty(entity.Name)) return BadRequest("Name is empty");
+                if (entity.Name.Length > 50) return BadRequest("Name consists of more than 50 letters");
+                var products = _productService.GetByName(entity.Name);
+                if (products.Count != 0) return BadRequest("Name is not unique");
                 _productService.Create(entity);
-                var id = entity.Id;
-                var uri = new Uri($"http://localhost:50896/api/product/{id}");
-                return Created(uri, id);
-            }
-            catch (ValidationException e)
-            {
-                Log.Error("Exception occured when you tried to add a new product", e);
-                return BadRequest(e.Message);
+                return CreatedAtRoute("DefaultApi", new { controller = "product", id = entity.Id }, entity.Id);
             }
             catch (Exception e)
             {
@@ -103,24 +101,22 @@ namespace ShoppingCart.WebApi.Controllers
             }
         }
 
-        //PUT api/product/id
-        public IHttpActionResult Put(int id, [FromBody] Product product)
+        //PUT api/product
+        [HttpPut]
+        [Route("api/product")]
+        public IHttpActionResult Update([FromBody] Product product)
         {
-            if ((id < 0) || (product == null))
-            {
-                Log.Error("Entity or id is not valid");
-                return BadRequest();
-            }
             try
             {
-                if (_productService.Update(id, product))
-                    return StatusCode(HttpStatusCode.NoContent);
-                return BadRequest();
-            }
-            catch (ValidationException e)
-            {
-                Log.Error("Exception occured when you tried to update a product", e);
-                return BadRequest(e.Message);
+                if (product == null) return BadRequest("Entity is not valid");
+                if (product.Id < 0) return BadRequest("Id is not valid");
+                if (string.IsNullOrEmpty(product.Name)) return BadRequest("Name is empty");
+                if (product.Name.Length > 50) return BadRequest("Name consists of more than 50 letters");
+                var products = _productService.GetByName(product.Name);
+                if (!((products.Count == 0) | ((products.Count == 1) && products.First().Id == product.Id)))
+                    return BadRequest("Name is not unique");
+                _productService.Update(product);
+                return StatusCode(HttpStatusCode.NoContent);
             }
             catch (Exception e)
             {
@@ -130,6 +126,7 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         // DELETE api/product/id
+        [HttpDelete]
         public IHttpActionResult Delete(int id)
         {
             try

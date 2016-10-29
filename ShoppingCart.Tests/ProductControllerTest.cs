@@ -3,9 +3,9 @@ using System.Net;
 using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using ShoppingCart.Business;
 using ShoppingCart.Controllers;
 using ShoppingCart.DAL;
-using ShoppingCart.ProductService;
 
 namespace ShoppingCart.Tests
 {
@@ -70,6 +70,7 @@ namespace ShoppingCart.Tests
             foreach (var incorrectPageSize in incorrectPageSizeList)
             {
                 controller.List(null, null, null, 1, incorrectPageSize);
+
                 //Assert
                 mock.Verify(ps => ps.List(null, null, true, 0, 50));
             }

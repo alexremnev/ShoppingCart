@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ShoppingCart.DAL;
 
-namespace ShoppingCart.ProductService
+namespace ShoppingCart.Business
 {
     public class ProductService : IProductService
     {
@@ -37,9 +37,14 @@ namespace ShoppingCart.ProductService
             return _repo.Count(filter);
         }
 
-        public bool Update(int id, Product entity)
+        public void Update(Product entity)
         {
-            return _repo.Update(id,entity);
+            _repo.Update(entity);
+        }
+
+        public IList<Product> GetByName(string name)
+        {
+            return _repo.GetByName(name);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ShoppingCart.DAL;
 
-namespace ShoppingCart.ProductService
+namespace ShoppingCart.Business
 {
     public interface IProductService
     {
@@ -37,12 +37,16 @@ namespace ShoppingCart.ProductService
         /// <param name="filter">filter of products or null.</param>
         /// <returns>found number of products</returns>
         int Count(string filter);
-
         /// <summary>
         /// Update a product.
         /// </summary>
-        /// <param name="id">entity id.</param>
         /// <param name="entity">entity product.</param>
-        bool Update(int id, Product entity);
+        void Update(Product entity);
+        /// <summary>
+        /// Get the collection of products.
+        /// </summary>
+        /// <param name="name">entity name of product</param>
+        /// <returns>found entity or null.</returns>
+        IList<Product> GetByName(string name);
     }
 }

@@ -1,12 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" namespace="ShoppingCart.DAL" assembly="ShoppingCart.DAL">
-  <class name="Product" table ="Product">
+  <class name="Order" table ="Orders">
     <id name="Id">
       <generator class="identity"/>
     </id>
-    <property name="Name" unique="true" column="Name"/>
-    <property name="Quantity" column="Quantity"/>
-    <property name="Price" column="Price" />
-    <property name="Sku" column="Sku" />
+    <property name="Total" column="Total" />
+    <bag name ="LineItems" cascade = "all" lazy="false">
+      <key column ="OrderId"/>
+      <one-to-many class ="LineItem"/>
+    </bag>
   </class>
 </hibernate-mapping>

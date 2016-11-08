@@ -16,6 +16,11 @@ namespace ShoppingCart.Business
             return _repo.List(filter, sortby, sortDirection, firstResult, maxResults);
         }
 
+        public IList<Product> List(int firstResult, int maxResults)
+        {
+            return _repo.List(null, null, true, firstResult, maxResults);
+        }
+
         public Product Get(int id)
         {
             var product = _repo.Get(id);
@@ -24,6 +29,7 @@ namespace ShoppingCart.Business
 
         public void Create(Product entity)
         {
+            entity.Sku = GenerateSku(entity.Name);
             _repo.Create(entity);
         }
 
@@ -39,12 +45,18 @@ namespace ShoppingCart.Business
 
         public void Update(Product entity)
         {
+            entity.Sku = GenerateSku(entity.Name);
             _repo.Update(entity);
         }
 
-        public IList<Product> GetByName(string name)
+        public Product GetByName(string name)
         {
             return _repo.GetByName(name);
+        }
+        private static string GenerateSku(string name)
+        {
+            var sku = name.Replace(' ', '_');
+            return "sku_" + sku;
         }
     }
 }

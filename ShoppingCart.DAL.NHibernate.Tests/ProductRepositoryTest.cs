@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Common.Logging;
 using NHibernate;
@@ -53,7 +54,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(RepositoryException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void Can_create_product_with_null_entity()
         {
             var repository = ProductRepository;
@@ -117,7 +118,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(RepositoryException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void Can_update_product_with_null_entity()
         {
 
@@ -126,17 +127,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             repository.Update(null);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(RepositoryException))]
-        public void Can_update_product_with_not_exist()
-        {
-            var product = new Product { Id = 10000, Name = "Car" };
-            var repository = ProductRepository;
-
-            repository.Update(product);
-        }
-
-        [TestMethod]
+       [TestMethod]
         public void Can_remove_product_by_id()
         {
             Product[] list =
@@ -314,16 +305,17 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         }
 
         [TestMethod]
-        public void Can_get_list_by_name()
+        public void Can_get_product_by_name()
         {
-            var name = "Car";
-            var list = new List<Product> { new Product { Name = "Car" }, new Product { Name = "Car" } };
+            const string name = "Car";
+            var product = new Product {Name = "Car"};
+            var list =  new List<Product> {product};
             CreateInitialData(list);
-            var expected = list;
+            var expected = product;
             var repository = ProductRepository;
             var actual = repository.GetByName(name);
 
-            AssertList(expected, actual);
+           CompareProducts(expected,actual);
         }
 
         private static void AssertList(IList<Product> expectedList, IList<Product> actualList)

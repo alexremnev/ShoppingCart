@@ -44,7 +44,7 @@ namespace ShoppingCart.Business.Tests
         }
 
         [TestMethod]
-        public void Can_can_create_product()
+        public void Can_create_product()
         {
             var product = new Product { Name = "Car yellow", Quantity = 5, Price = 15000 };
             var mock = new Mock<IProductRepository>();
@@ -68,11 +68,10 @@ namespace ShoppingCart.Business.Tests
         [TestMethod]
         public void Can_get_count()
         {
-            var expected = 5;
+            const int expected = 5;
             var mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Count(null)).Returns(expected);
             var service = new ProductService(mock.Object);
-
 
             var actual = service.Count(null);
             Assert.AreEqual(expected, actual);
@@ -87,14 +86,13 @@ namespace ShoppingCart.Business.Tests
             var service = new ProductService(mock.Object);
 
             service.Update(product);
-
         }
 
         [TestMethod]
         public void Get_by_name()
         {
             const string name = "car";
-            var expected = new List<Product> { new Product { Name = "car" }, new Product { Name = "car" } };
+            var expected =  new Product { Name = "car" };
             var mock = new Mock<IProductRepository>();
             mock.Setup(m => m.GetByName(It.IsAny<string>())).Returns(expected);
             var service = new ProductService(mock.Object);
@@ -102,6 +100,5 @@ namespace ShoppingCart.Business.Tests
             var actual = service.GetByName(name);
             Assert.AreEqual(expected, actual);
         }
-
     }
 }

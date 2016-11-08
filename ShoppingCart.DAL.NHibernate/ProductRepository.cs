@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Common.Logging;
 using NHibernate;
-using Spring.Data.NHibernate;
 using Spring.Transaction.Interceptor;
 
 namespace ShoppingCart.DAL.NHibernate
 {
-    public class ProductRepository : IProductRepository
+    public class ProductRepository : BaseRepository<Product>, IProductRepository
     {
-        public ISessionFactory Sessionfactory { get; set; }
-
         private const int DefaultFirstResult = 0;
         private const string DefaultSortby = "id";
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
@@ -24,24 +21,8 @@ namespace ShoppingCart.DAL.NHibernate
                 {"quantity", p => p.Quantity}
             };
 
-        [Transaction]
-        public void Create(Product entity)
-        {
-            try
-            {
-                if (entity == null) throw new RepositoryException("Entity is null");
-                var ht = new HibernateTemplate(Sessionfactory);
-                ht.Save(entity);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occured when system tried to create a new product", e);
-                throw;
-            }
-        }
-
         public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true,
-            int firstResult = 0, int maxResults = 50)
+             int firstResult = 0, int maxResults = 50)
         {
 
             if (firstResult < 0) firstResult = DefaultFirstResult;
@@ -91,49 +72,14 @@ namespace ShoppingCart.DAL.NHibernate
             }
         }
 
-        [Transaction]
-        public void Update(Product entity)
+        protected override ILog GetLog()
         {
-            try
-            {
-                if (entity == null)
-                {
-                    Log.Error("Entity is not valid");
-                    throw new RepositoryException("Entity is not valid");
-                }
-                var entityId = entity.Id;
-                var product = Get(entityId);
-                if (product == null)
-                {
-                    Log.Error($"Id ={entityId} is not exist");
-                    throw new RepositoryException("Id is not exist");
-                }
-                var ht = new HibernateTemplate(Sessionfactory);
-                ht.Update(entity);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occured when system tried to update product", e);
-                throw;
-            }
+            return Log;
         }
 
-        public Product Get(int id)
+        protected override string GetNameOfEntity()
         {
-            using (var session = Sessionfactory.OpenSession())
-            {
-                try
-                {
-                    if (id <= 0) throw new RepositoryException("Id can not be below 1");
-                    return session.Get<Product>(id);
-                }
-                catch (Exception e)
-                {
-                    Log.Error(
-                        $"Exception occured when system tried to get the list of products by id ={id} from database", e);
-                    throw;
-                }
-            }
+            return "product";
         }
 
         [Transaction]
@@ -180,20 +126,20 @@ namespace ShoppingCart.DAL.NHibernate
             }
         }
 
-        public IList<Product> GetByName(string name)
+        public Product GetByName(string name)
         {
-            IList<Product> product;
-            if (string.IsNullOrEmpty(name)) return new List<Product>();
+            Product product;
+            if (string.IsNullOrEmpty(name)) return null;
             using (var session = Sessionfactory.OpenSession())
             {
                 try
                 {
-                    product = session.QueryOver<Product>().Where(n => n.Name == name).List();
+                    product = session.QueryOver<Product>().Where(m => m.Name == name).SingleOrDefault();
                 }
                 catch (Exception e)
                 {
                     Log.Error(
-                        "Exception occured when system tried to check the name on uniqueness", e);
+                        "Exception occured when system tried to get the product by name", e);
                     throw;
                 }
             }

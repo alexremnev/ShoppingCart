@@ -42,10 +42,10 @@ namespace ShoppingCart.DAL
         /// <param name="entity">entity product. If product is null occurs RepositoryException.</param>
         void Update(Product entity);
         /// <summary>
-        /// Get the collection of products.
+        /// Get the product or null.
         /// </summary>
         /// <param name="name">entity name of product</param>
-        /// <returns>found entity or null.</returns>
-        IList<Product> GetByName(string name);
+        /// <returns>found entity. If product not exist or amount of product more then 2 return null.</returns>
+        Product GetByName(string name);
     }
 }

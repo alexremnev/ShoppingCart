@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Web.Http;
 using Common.Logging;
@@ -8,10 +7,11 @@ using ShoppingCart.DAL;
 
 namespace ShoppingCart.WebApi.Controllers
 {
-    public class ProductController : ApiController
+    public class ProductController : BaseController<Product>
     {
+        private const string Controller = "product";
         private static readonly ILog Log = LogManager.GetLogger<ProductController>();
-        private const int StartPointPage = 1;
+        private const int FirstPage = 1;
         private const int MaxPageSize = 50;
         private const bool DefaultSortDirection = true;
         private readonly IProductService _productService;
@@ -23,14 +23,14 @@ namespace ShoppingCart.WebApi.Controllers
 
         // GET api/product/list
         [HttpGet]
-        [Route("api/product")]
-        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = StartPointPage, int? pageSize = MaxPageSize)
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
+        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
         {
             try
             {
                 sortDirection = sortDirection ?? DefaultSortDirection;
-                page = page ?? StartPointPage;
-                page = page < 1 ? StartPointPage : page;
+                page = page ?? FirstPage;
+                page = page < 1 ? FirstPage : page;
                 pageSize = pageSize ?? MaxPageSize;
                 pageSize = pageSize > 250 ? MaxPageSize : pageSize;
                 pageSize = pageSize <= 0 ? MaxPageSize : pageSize;
@@ -47,6 +47,7 @@ namespace ShoppingCart.WebApi.Controllers
 
         // GET api/product/count/
         [HttpGet]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/count")]
         public IHttpActionResult Count(string filter = null)
         {
             try
@@ -63,13 +64,12 @@ namespace ShoppingCart.WebApi.Controllers
 
         // GET api/product/id
         [HttpGet]
-        public IHttpActionResult GetById(int id)
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/{id}")]
+        public  IHttpActionResult GetById(int id)
         {
             try
             {
-                if (id < 0) return BadRequest();
-                var product = _productService.Get(id);
-                return product == null ? (IHttpActionResult)NotFound() : Ok(product);
+                return Get(id);
             }
             catch (Exception e)
             {
@@ -80,19 +80,20 @@ namespace ShoppingCart.WebApi.Controllers
 
         // POST api/product
         [HttpPost]
-        [Route("api/product")]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
         public IHttpActionResult Create([FromBody]Product entity)
         {
-
             try
             {
                 if (entity == null) return BadRequest("Entity is not valid");
                 if (string.IsNullOrEmpty(entity.Name)) return BadRequest("Name is empty");
                 if (entity.Name.Length > 50) return BadRequest("Name consists of more than 50 letters");
+                if (entity.Price < 0) return BadRequest("Price can't be less then 0");
+                if (entity.Quantity < 0) return BadRequest("Quantity can't be less then 0");
                 var products = _productService.GetByName(entity.Name);
-                if (products.Count != 0) return BadRequest("Name is not unique");
+                if (products != null) return BadRequest("Name is not unique");
                 _productService.Create(entity);
-                return CreatedAtRoute("DefaultApi", new { controller = "product", id = entity.Id }, entity.Id);
+                return CreatedAtRoute(WebApiConfig.DefaultRoute, new { controller = Controller, id = entity.Id }, entity.Id);
             }
             catch (Exception e)
             {
@@ -103,19 +104,32 @@ namespace ShoppingCart.WebApi.Controllers
 
         //PUT api/product
         [HttpPut]
-        [Route("api/product")]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
         public IHttpActionResult Update([FromBody] Product product)
         {
             try
             {
                 if (product == null) return BadRequest("Entity is not valid");
-                if (product.Id < 0) return BadRequest("Id is not valid");
+                var productId = product.Id;
+                if (productId < 0) return BadRequest("Id is not valid");
                 if (string.IsNullOrEmpty(product.Name)) return BadRequest("Name is empty");
                 if (product.Name.Length > 50) return BadRequest("Name consists of more than 50 letters");
-                var products = _productService.GetByName(product.Name);
-                if (!((products.Count == 0) | ((products.Count == 1) && products.First().Id == product.Id)))
-                    return BadRequest("Name is not unique");
-                _productService.Update(product);
+                if (product.Price < 0) return BadRequest("Price can't be less then 0");
+                if (product.Quantity < 0) return BadRequest("Quantity can't be less then 0");
+                var productByName = _productService.GetByName(product.Name);
+                if ((productByName != null) && (productByName.Id != productId)) return BadRequest("Name is not unique");
+                Product oldProduct;
+                if ((productByName != null) && (productByName.Id == productId))
+                    oldProduct = productByName;
+                else
+                {
+                    oldProduct = _productService.Get(productId);
+                    if (oldProduct == null) return BadRequest($"Product with id={productId} not exist");
+                }
+                oldProduct.Name = product.Name;
+                oldProduct.Quantity = product.Quantity;
+                oldProduct.Price = product.Price;
+                _productService.Update(oldProduct);
                 return StatusCode(HttpStatusCode.NoContent);
             }
             catch (Exception e)
@@ -140,6 +154,11 @@ namespace ShoppingCart.WebApi.Controllers
                 Log.Error("Exception occured when you tried to delete the product by id", e);
                 return InternalServerError();
             }
+        }
+
+        public override IService<Product> GetService()
+        {
+            return _productService;
         }
     }
 }

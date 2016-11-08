@@ -45,9 +45,9 @@ namespace ShoppingCart.WebApi.Tests
             //Arrange
             var mock = new Mock<IProductService>();
             var controller = new ProductController(mock.Object);
-            var listIncorrectPageList = new List<int> { -100, -1, 0 };
+            var incorrectPages = new List<int> { -100, -1, 0 };
             //Act
-            foreach (var incorrectPage in listIncorrectPageList)
+            foreach (var incorrectPage in incorrectPages)
             {
                 controller.List(null, null, null, incorrectPage, 5);
                 //Assert
@@ -61,9 +61,9 @@ namespace ShoppingCart.WebApi.Tests
             //Arrange
             var mock = new Mock<IProductService>();
             var controller = new ProductController(mock.Object);
-            var incorrectPageSizeList = new List<int> { -1, 0, 251 };
+            var incorrectPageSizes = new List<int> { -1, 0, 251 };
             //Act
-            foreach (var incorrectPageSize in incorrectPageSizeList)
+            foreach (var incorrectPageSize in incorrectPageSizes)
             {
                 controller.List(null, null, null, 1, incorrectPageSize);
                 //Assert
@@ -167,12 +167,11 @@ namespace ShoppingCart.WebApi.Tests
         {
             //Arrange
             var product = new Product { Id = 3, Name = "Car red", Quantity = 5, Price = 15000 };
-            var expected = product.Id;
-            var expectedRouteName = "DefaultApi";
+            const string expectedRouteName = "DefaultApi";
             var expectedContent = product.Id;
             var expectedRouteValue = product.Id;
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.GetByName(product.Name)).Returns(new List<Product>());
+            mock.Setup(m => m.GetByName(product.Name)).Returns((Product)null);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -180,7 +179,6 @@ namespace ShoppingCart.WebApi.Tests
 
             //Assert
             Assert.IsNotNull(actual);
-            Assert.AreEqual(expected, actual.Content);
             Assert.AreEqual(expectedRouteName, actual.RouteName);
             Assert.AreEqual(expectedContent, actual.Content);
             Assert.AreEqual(expectedRouteValue, actual.RouteValues["id"]);
@@ -234,11 +232,10 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_create_product_with_not_unique_name()
         {
             //Arrange
-            var list = new List<Product> { new Product { Name = "Car" } };
             var product = new Product { Name = "Car" };
             const string expected = "Name is not unique";
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.GetByName(product.Name)).Returns(list);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(new Product { Name = "Car" });
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -259,18 +256,18 @@ namespace ShoppingCart.WebApi.Tests
             //Act
             var actual = controller.Create(product) as InternalServerErrorResult;
             Assert.IsNotNull(actual);
-
         }
 
         [TestMethod]
         public void Can_update_product()
         {
             //Arrange
-            var product = new Product() { Id = 5, Name = "Car yellow", Quantity = 5, Price = 15000 };
+            var product = new Product { Id = 5, Name = "Car yellow", Quantity = 5, Price = 15000 };
             var mock = new Mock<IProductService>();
             var expected = HttpStatusCode.NoContent;
-            mock.Setup(m => m.GetByName(product.Name)).Returns(new List<Product>());
+            mock.Setup(m => m.GetByName(product.Name)).Returns((Product)null);
             mock.Setup(m => m.Update(product));
+            mock.Setup(m => m.Get(It.IsAny<int>())).Returns(product);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -286,11 +283,11 @@ namespace ShoppingCart.WebApi.Tests
         {
             //Arrange
             var expected = HttpStatusCode.NoContent;
-            var listCar = new List<Product> { new Product { Id = 5, Name = "Car" } };
+            var value = new Product { Id = 5, Name = "Car" };
             var product = new Product { Id = 5, Name = "Car" };
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.GetByName(product.Name)).Returns(listCar);
-            // mock.Setup(m => m.Update(product));
+            mock.Setup(m => m.GetByName(product.Name)).Returns(value);
+            mock.Setup(m => m.Get(It.IsAny<int>())).Returns(value);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -356,11 +353,11 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_update_product_with_not_unique_name()
         {
             //Arrange
-            var listCar = new List<Product> { new Product { Name = "Car" }, new Product { Name = "Car" } };
+            var value = new Product { Id = 4, Name = "Car" };
             const string expected = "Name is not unique";
             var product = new Product { Name = "Car" };
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.GetByName(product.Name)).Returns(listCar);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(value);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -375,11 +372,11 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_update_product_with_not_unique_name_but_not_same_id()
         {
             //Arrange
-            var listCar = new List<Product> { new Product { Id = 3, Name = "Car" } };
+            var value = new Product { Id = 3, Name = "Car" };
             const string expected = "Name is not unique";
             var product = new Product { Id = 5, Name = "Car" };
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.GetByName(product.Name)).Returns(listCar);
+            mock.Setup(m => m.GetByName(product.Name)).Returns(value);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -389,7 +386,6 @@ namespace ShoppingCart.WebApi.Tests
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected, actual.Message);
         }
-
 
         [TestMethod]
         public void Can_update_with_exception()

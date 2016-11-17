@@ -38,9 +38,9 @@ namespace ShoppingCart.Business
             _repo.Delete(id);
         }
 
-        public int Count(string filter)
+        public int Count(string filter,decimal maxPrice)
         {
-            return _repo.Count(filter);
+            return _repo.Count(filter,maxPrice);
         }
 
         public void Update(Product entity)

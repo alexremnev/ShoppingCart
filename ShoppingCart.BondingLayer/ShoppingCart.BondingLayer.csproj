@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FB90F7AC-550E-4D9B-B530-AD13B1109D11}</ProjectGuid>
+    <ProjectGuid>{E8C723D2-4F18-4A55-9DF6-E0949F0C50AA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ShoppingCart.Business</RootNamespace>
-    <AssemblyName>ShoppingCart.Business</AssemblyName>
+    <RootNamespace>ShoppingCart.BondingLayer</RootNamespace>
+    <AssemblyName>ShoppingCart.BondingLayer</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,14 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\packages\NHibernate.4.0.4.4000\lib\net40\NHibernate.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,25 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CryptoEngine.cs" />
-    <Compile Include="CustomerService.cs" />
-    <Compile Include="ICryptoEngine.cs" />
-    <Compile Include="ICustomerService.cs" />
-    <Compile Include="IService.cs" />
-    <Compile Include="IOrderService.cs" />
-    <Compile Include="IProductService.cs" />
-    <Compile Include="OrderService.cs" />
-    <Compile Include="ProductService.cs" />
+    <Compile Include="Connector.cs" />
+    <Compile Include="IConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ShoppingCart.DAL\ShoppingCart.DAL.csproj">
-      <Project>{257866b1-be92-48b0-abe0-19eadd5470e6}</Project>
-      <Name>ShoppingCart.DAL</Name>
+    <ProjectReference Include="..\ShoppingCart.WebApi\ShoppingCart.WebApi.csproj">
+      <Project>{ad96890f-77ec-4f36-a0de-ca35cf8551f6}</Project>
+      <Name>ShoppingCart.WebApi</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

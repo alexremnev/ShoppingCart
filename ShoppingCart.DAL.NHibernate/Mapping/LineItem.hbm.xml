@@ -6,7 +6,10 @@
     </id>
     <property name="ProductId" column="ProductId"/>
     <property name="Name" column="Name"/>
+    <property name="Creator" column="Creator"/>
     <property name="Quantity" column="Quantity"/>
     <property name="Price" column="Price"/>
+    <property name="CreatedDate" column="CreatedDate" />
+    <property name="ModifiedDate" column="ModifiedDate" />
   </class>
 </hibernate-mapping>

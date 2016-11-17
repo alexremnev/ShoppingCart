@@ -10,7 +10,7 @@ namespace ShoppingCart.Business.Tests
         [TestMethod]
         public void Can_create_customer()
         {
-            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = 555555};
+            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var mock = new Mock<ICustomerRepository>();
             mock.Setup(m => m.Create(customer));
             var service = new CustomerService(mock.Object);
@@ -21,7 +21,7 @@ namespace ShoppingCart.Business.Tests
         [TestMethod]
         public void Can_update_customer()
         {
-            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var mock = new Mock<ICustomerRepository>();
             mock.Setup(m => m.Update(customer));
             var service = new CustomerService(mock.Object);

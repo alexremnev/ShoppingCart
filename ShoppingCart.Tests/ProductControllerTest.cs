@@ -26,7 +26,7 @@ namespace ShoppingCart.Tests
         };
             var expected = list;
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.Count(null)).Returns(list.Count);
+            mock.Setup(m => m.Count(null,0)).Returns(list.Count);
             mock.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
             var controller = new ProductController(mock.Object);
 
@@ -45,7 +45,7 @@ namespace ShoppingCart.Tests
             //Arrange
             const int count = 5;
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
+            mock.Setup(m => m.Count(It.IsAny<string>(),0)).Returns(count);
             var controller = new ProductController(mock.Object);
             var listIncorrectPageList = new List<int> { -100, -1, 0 };
             //Act
@@ -63,7 +63,7 @@ namespace ShoppingCart.Tests
             //Arrange
             const int count = 5;
             var mock = new Mock<IProductService>();
-            mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
+            mock.Setup(m => m.Count(It.IsAny<string>(),0)).Returns(count);
             var controller = new ProductController(mock.Object);
             var incorrectPageSizeList = new List<int> { -1, 0, 251 };
             //Act
@@ -83,7 +83,7 @@ namespace ShoppingCart.Tests
             var mock = new Mock<IProductService>();
             const int count = 7;
             var expected = count;
-            mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
+            mock.Setup(m => m.Count(It.IsAny<string>(),0)).Returns(count);
             var controller = new ProductController(mock.Object);
 
             //Act

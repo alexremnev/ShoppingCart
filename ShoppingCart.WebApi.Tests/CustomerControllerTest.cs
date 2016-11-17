@@ -25,7 +25,7 @@ namespace ShoppingCart.WebApi.Tests
                         };
             var expected = list;
             var mock = new Mock<ICustomerService>();
-            mock.Setup(m => m.List(0, 5)).Returns(list);
+            mock.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
             var controller = new CustomerController(mock.Object);
 
             //Act
@@ -48,7 +48,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(incorrectPage, 5);
                 //Assert
-                mock.Verify(ps => ps.List(0, 5));
+                mock.Verify(ps => ps.List(null, null, true, 0, 5));
             }
         }
 
@@ -64,7 +64,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(1, incorrectPageSize);
                 //Assert
-                mock.Verify(ps => ps.List(0, 50));
+                mock.Verify(ps => ps.List(null, null, true, 0, 50));
             }
         }
 
@@ -72,7 +72,7 @@ namespace ShoppingCart.WebApi.Tests
         public void can_get_list_with_exception()
         {
             var mock = new Mock<ICustomerService>();
-            mock.Setup(m => m.List(0,5)).Throws(new Exception());
+            mock.Setup(m => m.List(null, null, true, 0, 5)).Throws(new Exception());
             var controller = new CustomerController(mock.Object);
             var actual = controller.List(0,5) as InternalServerErrorResult;
             Assert.IsNotNull(actual);
@@ -151,7 +151,7 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_create_customer()
         {
             //Arrange
-            var customer = new Customer { Id = 3, Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Id = 3, Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var expected = customer.Id;
             var expectedRouteName = "DefaultApi";
             var expectedRouteValue = customer.Id;
@@ -186,7 +186,7 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_create_customer_with_empty_name()
         {
             //Arrange
-            var customer = new Customer { Name = "", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Name = "", Email = "bob@rambler.ru", Card = "555555" };
             const string expected = "Name is empty";
             var mock = new Mock<ICustomerService>();
             var controller = new CustomerController(mock.Object);
@@ -201,7 +201,7 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_create_customer_with_exception()
         {
             //Arrange
-            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var mock = new Mock<ICustomerService>();
             mock.Setup(m => m.Create(customer)).Throws(new Exception());
             var controller = new CustomerController(mock.Object);
@@ -214,7 +214,7 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_update_customer()
         {
             //Arrange
-            var customer = new Customer { Id = 2, Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Id = 2, Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var mock = new Mock<ICustomerService>();
             var expected = HttpStatusCode.NoContent;
             mock.Setup(m => m.Update(customer));
@@ -249,7 +249,7 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_update_customer_with_empty_name()
         {
             //Arrange
-            var customer = new Customer { Name = "", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Name = "", Email = "bob@rambler.ru", Card = "555555" };
             const string expected = "Name is empty";
             var mock = new Mock<ICustomerService>();
             var controller = new CustomerController(mock.Object);
@@ -266,7 +266,7 @@ namespace ShoppingCart.WebApi.Tests
         public void Can_update_customer_with_exception()
         {
             //Arrange
-            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var mock = new Mock<ICustomerService>();
             mock.Setup(m => m.Get(customer.Id)).Throws(new Exception());
             var controller = new CustomerController(mock.Object);

@@ -1,4 +1,4 @@
 ﻿namespace ShoppingCart.DAL
 {
-    public interface IOrderRepository : IBaseRepository<Order> { }
+    public interface IOrderRepository : IRepository<Order> { }
 }

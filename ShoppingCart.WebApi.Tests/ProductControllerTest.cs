@@ -94,7 +94,7 @@ namespace ShoppingCart.WebApi.Tests
             var mock = new Mock<IProductService>();
             const int count = 7;
             var expected = count;
-            mock.Setup(m => m.Count(It.IsAny<string>())).Returns(count);
+            mock.Setup(m => m.Count(It.IsAny<string>(),0)).Returns(count);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -103,7 +103,7 @@ namespace ShoppingCart.WebApi.Tests
             //Assert
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected, actual.Content);
-            mock.Verify(ps => ps.Count(null));
+            mock.Verify(ps => ps.Count(null,0));
         }
 
         [TestMethod]

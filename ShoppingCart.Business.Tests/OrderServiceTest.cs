@@ -29,10 +29,10 @@ namespace ShoppingCart.Business.Tests
             var expected = list;
             var mockRepository = new Mock<IOrderRepository>();
             var mockService = new Mock<IProductService>();
-            mockRepository.Setup(m => m.List(0, 50)).Returns(list);
+            mockRepository.Setup(m => m.List(null, null, true, 0, 50,null)).Returns(list);
             var service = new OrderService(mockRepository.Object, mockService.Object);
 
-            var actual = service.List(0, 50);
+            var actual = service.List(null, null, true, 0, 50);
 
             Assert.AreEqual(expected, actual);
         }

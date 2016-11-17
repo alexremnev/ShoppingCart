@@ -15,9 +15,9 @@ namespace ShoppingCart.Business
             _productService = productService;
         }
 
-        public IList<Order> List(int firstResult, int maxResults)
+        public IList<Order> List(string filter, string sortby, bool isAscending, int firstResult, int maxResults)
         {
-            return _orderRepository.List(firstResult, maxResults);
+            return _orderRepository.List(null, null, true, firstResult, maxResults);
         }
 
         public Order Get(int id)
@@ -28,11 +28,31 @@ namespace ShoppingCart.Business
         public void Place(Order entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
+            PrepateEntity(entity);
+            if (!entity.SaleDate.HasValue) entity.SaleDate = DateTime.Now;
+            _orderRepository.Create(entity);
+        }
+
+        public void Update(Order entity)
+        {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            PrepateEntity(entity);
+            _orderRepository.Update(entity);
+        }
+
+        public int Count(string filter, decimal maxPrice)
+        {
+            return _orderRepository.Count();
+        }
+
+        private void PrepateEntity(Order entity)
+        {
             var products = entity.LineItems;
             decimal total = 0;
             foreach (var item in products)
             {
                 var product = _productService.Get(item.ProductId);
+                item.Name = product.Name;
                 item.Price = product.Price;
                 total += item.Quantity * item.Price;
                 if (item.Quantity > product.Quantity) item.Quantity = product.Quantity;
@@ -40,7 +60,16 @@ namespace ShoppingCart.Business
                 _productService.Update(product);
             }
             entity.Total = total;
-            _orderRepository.Create(entity);
+        }
+
+        public void ReturnProducts(IList<LineItem> products)
+        {
+            foreach (var product in products)
+            {
+                var existPoduct = _productService.Get(product.ProductId);
+                existPoduct.Quantity = existPoduct.Quantity + product.Quantity;
+                _productService.Update(existPoduct);
+            }
         }
     }
 }

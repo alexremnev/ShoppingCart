@@ -38,7 +38,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         [TestMethod]
         public void Can_create_new_customer()
         {
-            var expected = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var expected = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             var repository = CustomerRepository;
 
             repository.Create(expected);
@@ -74,9 +74,9 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         [TestMethod]
         public void Can_update_product()
         {
-            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = 555555 };
+            var customer = new Customer { Name = "Bob", Email = "bob@rambler.ru", Card = "555555" };
             CreateInitialData(new List<Customer> { customer });
-            var expected = new Customer { Id = customer.Id, Name = "Clark", Email = "clark@rambler.ru", Card = 111111 };
+            var expected = new Customer { Id = customer.Id, Name = "Clark", Email = "clark@rambler.ru", Card = "111111" };
             var repository = CustomerRepository;
 
             repository.Update(expected);

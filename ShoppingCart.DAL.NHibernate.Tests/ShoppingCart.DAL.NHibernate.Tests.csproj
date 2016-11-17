@@ -106,9 +106,11 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CustomerRepositoryTest.cs" />
+    <Compile Include="ModifiedDateInterceptorTest.cs" />
     <Compile Include="OrderRepositoryTest.cs" />
     <Compile Include="ProductRepositoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CreatedDateInterceptorTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.config" />

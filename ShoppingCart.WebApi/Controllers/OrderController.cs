@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Web.Http;
 using Common.Logging;
 using ShoppingCart.Business;
@@ -14,7 +15,7 @@ namespace ShoppingCart.WebApi.Controllers
         private readonly IOrderService _orderService;
         private readonly IProductService _productService;
 
-        public OrderController(IOrderService orderService, IProductService productService)
+        public OrderController(IOrderService orderService, IProductService productService) : base(Controller)
         {
             _orderService = orderService;
             _productService = productService;
@@ -23,17 +24,9 @@ namespace ShoppingCart.WebApi.Controllers
         //api/order
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
-        public new IHttpActionResult List(int? page = null, int? pageSize = null)
+        public IHttpActionResult List(int? page = null, int? pageSize = null)
         {
-            try
-            {
-                return base.List(page, pageSize);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occured when you tried to get the list of orders", e);
-                return InternalServerError();
-            }
+            return List(null, null, true, page, pageSize);
         }
 
         // api/order/place
@@ -56,7 +49,7 @@ namespace ShoppingCart.WebApi.Controllers
 
                 if (products.Any(product => product.Quantity < 0))
                 {
-                    return BadRequest("Quantity can't be less then 0");
+                    return BadRequest("Quantity can't be less than 0");
                 }
                 _orderService.Place(entity);
                 return CreatedAtRoute(WebApiConfig.DefaultRoute, new { controller = Controller, id = entity.Id }, entity.Id);
@@ -69,23 +62,65 @@ namespace ShoppingCart.WebApi.Controllers
         }
         // GET api/order/id
         [HttpGet]
-        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller+"/{id}")]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/{id}")]
         public IHttpActionResult GetById(int id)
+        {
+            return Get(id);
+        }
+
+        protected override IService<Order> GetService()
+        {
+            return _orderService;
+        }
+
+        //PUT api/order
+        [HttpPut]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
+        public IHttpActionResult Update([FromBody] Order order)
         {
             try
             {
-                return Get(id);
+                if (order == null) return BadRequest("Entity is not valid");
+                var orderId = order.Id;
+                if (orderId < 0) return BadRequest("Order id is not valid");
+                var existOrder = _orderService.Get(orderId);
+                if (existOrder == null) return BadRequest("Order is not exist");
+                var products = order.LineItems;
+                if (products == null) return BadRequest("lineItems are empty");
+                foreach (var lineItem in products)
+                {
+                    var id = lineItem.ProductId;
+                    var product = _productService.Get(id);
+                    if (product != null) continue;
+                    return BadRequest($"Product with id = {id} is not exist");
+                }
+                if (products.Any(product => product.Quantity < 0))
+                {
+                    return BadRequest("Quantity can't be less than 0");
+                }
+                existOrder.SaleDate = order.SaleDate;
+                _orderService.ReturnProducts(existOrder.LineItems);
+                for (var i = 0; i < existOrder.LineItems.Count; i++)
+                {
+                    existOrder.LineItems[i].ProductId = order.LineItems[i].ProductId;
+                    existOrder.LineItems[i].Quantity = order.LineItems[i].Quantity;
+                }
+                _orderService.Update(existOrder);
+                return StatusCode(HttpStatusCode.NoContent);
             }
             catch (Exception e)
             {
-                Log.Error($"Exception occured when you tried to get the customer by id={id}", e);
+                Log.Error("Exception occured when you tried to update an order", e);
                 return InternalServerError();
             }
         }
 
-        public override IService<Order> GetService()
+        // GET api/order/count/
+        [HttpGet]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/count")]
+        public IHttpActionResult Count()
         {
-            return _orderService;
+            return base.Count();
         }
     }
 }

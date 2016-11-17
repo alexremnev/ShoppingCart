@@ -1,6 +1,6 @@
 ﻿namespace ShoppingCart.DAL
 {
-    public class Product
+    public class Product : BaseEntity
     {
         public virtual int Id { get; set; }
         public virtual string Name { get; set; }

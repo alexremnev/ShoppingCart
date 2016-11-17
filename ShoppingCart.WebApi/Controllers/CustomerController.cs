@@ -12,28 +12,19 @@ namespace ShoppingCart.WebApi.Controllers
     {
         private const string Controller = "customer";
         private readonly ICustomerService _customerService;
+        private static readonly ILog Log = LogManager.GetLogger<CustomerController>();
 
-        public CustomerController(ICustomerService customerService)
+        public CustomerController(ICustomerService customerService) : base(Controller)
         {
             _customerService = customerService;
         }
 
-        private static readonly ILog Log = LogManager.GetLogger<CustomerController>();
-
         // GET api/customer
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
-        public new IHttpActionResult List(int? page = null, int? pageSize = null)
+        public IHttpActionResult List(int? page = null, int? pageSize = null)
         {
-            try
-            {
-                return base.List(page, pageSize);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occured when you tried to get the list of customers", e);
-                return InternalServerError();
-            }
+            return List(null, null, true, page, pageSize);
         }
 
         //POST api/customer
@@ -47,7 +38,7 @@ namespace ShoppingCart.WebApi.Controllers
                 if (string.IsNullOrEmpty(entity.Name)) return BadRequest("Name is empty");
                 var email = entity.Email;
                 if (string.IsNullOrEmpty(email)) return BadRequest("Email is empty");
-                if (entity.Card < 0) return BadRequest("Card is not valid");
+                if (string.IsNullOrEmpty(entity.Card)) return BadRequest("Card is not valid");
                 if (!IsValidEmail(email)) return BadRequest("Email is not correct");
                 _customerService.Create(entity);
                 return CreatedAtRoute(WebApiConfig.DefaultRoute, new { controller = Controller, id = entity.Id }, entity.Id);
@@ -70,7 +61,7 @@ namespace ShoppingCart.WebApi.Controllers
                 var customerId = customer.Id;
                 if (customerId < 0) return BadRequest("Id is not valid");
                 if (string.IsNullOrEmpty(customer.Name)) return BadRequest("Name is empty");
-                if (customer.Card < 0) return BadRequest("Card is not valid");
+                if (string.IsNullOrEmpty(customer.Card)) return BadRequest("Card is not valid");
                 var oldCustomer = _customerService.Get(customerId);
                 if (oldCustomer == null) return BadRequest($"Product with id={customerId} not exist");
                 if (!IsValidEmail(customer.Email)) return BadRequest("Email is not correct");
@@ -92,15 +83,7 @@ namespace ShoppingCart.WebApi.Controllers
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/{id}")]
         public IHttpActionResult GetById(int id)
         {
-            try
-            {
-                return Get(id);
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Exception occured when you tried to get the customer by id={id}", e);
-                return InternalServerError();
-            }
+            return Get(id);
         }
         private bool IsValidEmail(string email)
         {
@@ -110,7 +93,15 @@ namespace ShoppingCart.WebApi.Controllers
             return matched;
         }
 
-        public override IService<Customer> GetService()
+        // GET api/customer/count/
+        [HttpGet]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/count")]
+        public IHttpActionResult Count()
+        {
+            return base.Count();
+        }
+
+        protected override IService<Customer> GetService()
         {
             return _customerService;
         }

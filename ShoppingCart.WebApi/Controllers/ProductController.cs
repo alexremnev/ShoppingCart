@@ -4,6 +4,7 @@ using System.Web.Http;
 using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
+using ShoppingCart.DAL.NHibernate;
 
 namespace ShoppingCart.WebApi.Controllers
 {
@@ -16,66 +17,34 @@ namespace ShoppingCart.WebApi.Controllers
         private const bool DefaultSortDirection = true;
         private readonly IProductService _productService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService) : base(Controller)
         {
             _productService = productService;
         }
+        public ISecurityContext Context { get; set; }
 
         // GET api/product/list
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
-        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
+        public new IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
         {
-            try
-            {
-                sortDirection = sortDirection ?? DefaultSortDirection;
-                page = page ?? FirstPage;
-                page = page < 1 ? FirstPage : page;
-                pageSize = pageSize ?? MaxPageSize;
-                pageSize = pageSize > 250 ? MaxPageSize : pageSize;
-                pageSize = pageSize <= 0 ? MaxPageSize : pageSize;
-                var firstResult = (page - 1) * pageSize;
-                var products = _productService.List(filter, sortby, sortDirection.Value, firstResult.Value, pageSize.Value);
-                return Ok(products);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occured when you tried to get the list of products", e);
-                return InternalServerError();
-            }
+            return base.List(filter, sortby, sortDirection, page, pageSize);
         }
 
         // GET api/product/count/
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/count")]
-        public IHttpActionResult Count(string filter = null)
+        public new IHttpActionResult Count(string filter = null, decimal maxPrice = 0)
         {
-            try
-            {
-                var count = _productService.Count(filter);
-                return Ok(count);
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Exception occured when you tried to get count of products by filter={filter}", e);
-                return InternalServerError();
-            }
+            return base.Count(filter, maxPrice);
         }
 
         // GET api/product/id
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/{id}")]
-        public  IHttpActionResult GetById(int id)
+        public IHttpActionResult GetById(int id)
         {
-            try
-            {
-                return Get(id);
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Exception occured when you tried to get the product by id={id}", e);
-                return InternalServerError();
-            }
+            return Get(id);
         }
 
         // POST api/product
@@ -92,6 +61,7 @@ namespace ShoppingCart.WebApi.Controllers
                 if (entity.Quantity < 0) return BadRequest("Quantity can't be less then 0");
                 var products = _productService.GetByName(entity.Name);
                 if (products != null) return BadRequest("Name is not unique");
+                Context.UserName = GenerateName();
                 _productService.Create(entity);
                 return CreatedAtRoute(WebApiConfig.DefaultRoute, new { controller = Controller, id = entity.Id }, entity.Id);
             }
@@ -156,7 +126,7 @@ namespace ShoppingCart.WebApi.Controllers
             }
         }
 
-        public override IService<Product> GetService()
+        protected override IService<Product> GetService()
         {
             return _productService;
         }

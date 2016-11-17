@@ -4,16 +4,9 @@ namespace ShoppingCart.DAL.NHibernate
 {
     public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
-       private static readonly ILog Log = LogManager.GetLogger<OrderRepository>();
+        private static readonly ILog Log = LogManager.GetLogger<OrderRepository>();
+        private const string NameEntity = "order";
 
-        protected override ILog GetLog()
-        {
-            return Log;
-        }
-
-        protected override string GetNameOfEntity()
-        {
-            return "order";
-        }
+        public OrderRepository() : base(Log, NameEntity) { }
     }
 }

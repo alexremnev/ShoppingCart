@@ -5,8 +5,10 @@
       <generator class="identity"/>
     </id>
     <property name="Name" column="Name"/>
+    <property name="Creator" column="Creator"/>
     <property name="Email" unique="true" column="Email"/>
-    <property name="Card" column="Card"/>
-<!--    <property name="Card" type="ShoppingCart.DAL.UserTypes.EncryptedLongAsString" column="Card"/>-->
+    <property name="Card" type="ShoppingCart.DAL.NHibernate.EncryptedString, ShoppingCart.DAL.NHibernate" column="Card"/>
+    <property name="CreatedDate" column="CreatedDate" />
+    <property name="ModifiedDate" column="ModifiedDate" />
   </class>
 </hibernate-mapping>

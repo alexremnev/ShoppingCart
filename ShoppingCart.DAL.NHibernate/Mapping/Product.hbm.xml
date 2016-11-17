@@ -5,8 +5,11 @@
       <generator class="identity"/>
     </id>
     <property name="Name" unique="true" column="Name"/>
+    <property name="Creator" column="Creator"/>
     <property name="Quantity" column="Quantity"/>
     <property name="Price" column="Price" />
+    <property name="CreatedDate" column="CreationDate" />
+    <property name="ModifiedDate" column="ModifiedDate" />
     <property name="Sku" column="Sku" />
   </class>
 </hibernate-mapping>

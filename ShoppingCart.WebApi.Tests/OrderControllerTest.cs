@@ -33,7 +33,7 @@ namespace ShoppingCart.WebApi.Tests
             var expected = list;
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
-            mockOrderService.Setup(m => m.List(0, 5)).Returns(list);
+            mockOrderService.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
             var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
 
             //Act
@@ -57,7 +57,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(incorrectPage, 5);
                 //Assert
-                mockOrderService.Verify(ps => ps.List(0, 5));
+                mockOrderService.Verify(ps => ps.List(null, null, true, 0, 5));
             }
         }
 
@@ -74,7 +74,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(1, incorrectPageSize);
                 //Assert
-                mockOrderService.Verify(ps => ps.List(0, 50));
+                mockOrderService.Verify(ps => ps.List(null, null, true, 0, 50));
             }
         }
 
@@ -83,7 +83,7 @@ namespace ShoppingCart.WebApi.Tests
         {
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
-            mockOrderService.Setup(m => m.List(0, 5)).Throws(new Exception());
+            mockOrderService.Setup(m => m.List(null, null, true, 0, 5)).Throws(new Exception());
             var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
             var actual = controller.List(0, 5) as InternalServerErrorResult;
             Assert.IsNotNull(actual);
@@ -280,7 +280,7 @@ namespace ShoppingCart.WebApi.Tests
         {
             //Arrange
             const int id = 1;
-           var order = new Order
+            var order = new Order
             {
                 LineItems = new List<LineItem>
                 {

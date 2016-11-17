@@ -78,15 +78,28 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseRepository.cs" />
+    <Compile Include="ComplexInterceptor.cs" />
+    <Compile Include="CreatedDateInterceptor.cs" />
+    <Compile Include="CreatorInterceptor.cs" />
     <Compile Include="CustomerRepository.cs" />
+    <Compile Include="DateTimeAsLong.cs" />
+    <Compile Include="ISecurityContext.cs" />
+    <Compile Include="SecurityContext.cs" />
+    <Compile Include="ModifiedDateInterceptor.cs" />
+    <Compile Include="EncryptedString.cs" />
     <Compile Include="OrderRepository.cs" />
     <Compile Include="ProductRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ShoppingCart.Business\ShoppingCart.Business.csproj">
+      <Project>{FB90F7AC-550E-4D9B-B530-AD13B1109D11}</Project>
+      <Name>ShoppingCart.Business</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ShoppingCart.DAL\ShoppingCart.DAL.csproj">
       <Project>{257866b1-be92-48b0-abe0-19eadd5470e6}</Project>
       <Name>ShoppingCart.DAL</Name>

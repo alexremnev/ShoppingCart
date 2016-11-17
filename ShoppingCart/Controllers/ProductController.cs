@@ -37,7 +37,7 @@ namespace ShoppingCart.Controllers
                 pageSize = pageSize <= 0 ? MaxPageSize : pageSize;
                 var firstResult = (page - 1) * pageSize;
                 IList<Product> products = null;
-                var count = _productService.Count(filter);
+                var count = _productService.Count(filter,0);
                 if (count != 0) products = _productService.List(filter, sortby, sortDirection.Value, firstResult.Value, pageSize.Value);
                 return Json(products, JsonRequestBehavior.AllowGet);
             }
@@ -54,7 +54,7 @@ namespace ShoppingCart.Controllers
         {
             try
             {
-                var count = _productService.Count(filter);
+                var count = _productService.Count(filter,0);
                 return Json(count, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)

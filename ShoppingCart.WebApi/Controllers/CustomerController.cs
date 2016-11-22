@@ -5,6 +5,7 @@ using System.Web.Http;
 using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
+using ShoppingCart.DAL.NHibernate;
 
 namespace ShoppingCart.WebApi.Controllers
 {
@@ -14,7 +15,7 @@ namespace ShoppingCart.WebApi.Controllers
         private readonly ICustomerService _customerService;
         private static readonly ILog Log = LogManager.GetLogger<CustomerController>();
 
-        public CustomerController(ICustomerService customerService) : base(Controller)
+        public CustomerController(ICustomerService customerService, ISecurityContext context) : base(Controller, context)
         {
             _customerService = customerService;
         }

@@ -15,10 +15,11 @@ namespace ShoppingCart.WebApi.Controllers
         private readonly string _entityName;
         private readonly ILog _log;
 
-        protected BaseController(string entityName)
+        protected BaseController(string entityName,ISecurityContext context)
         {
             _log = LogManager.GetLogger(GetType());
             _entityName = entityName;
+            context.UserName = GenerateName();
         }
 
         public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)

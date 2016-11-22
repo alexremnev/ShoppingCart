@@ -37,8 +37,7 @@ namespace ShoppingCart.DAL.NHibernate
             }
         }
 
-        public IList<T> List(string filter = null, string sortby = null, bool isAscending = true,
-             int firstResult = 0, int maxResults = 50, Func<string, string, bool, IQueryOver<T, T>, IQueryOver<T, T>> applyFilters = null)
+        public IList<T> List(int firstResult = 0, int maxResults = 50, Func<IQueryOver<T, T>, IQueryOver<T, T>> applyFilter = null)
         {
             if (firstResult < 0) firstResult = DefaultFirstResult;
             if (maxResults < 0) maxResults = Count();
@@ -49,7 +48,7 @@ namespace ShoppingCart.DAL.NHibernate
                 {
                     var query = session.QueryOver<T>();
                     var list = query.Skip(firstResult).Take(maxResults);
-                    applyFilters?.Invoke(filter, sortby, isAscending, query);
+                    applyFilter?.Invoke(query);
                     return list.List();
                 }
             }
@@ -99,21 +98,20 @@ namespace ShoppingCart.DAL.NHibernate
             return NewEntity();
         }
 
-        public int Count(string filter = null, decimal maxPrice = 0, Action<decimal, IQueryOver<T, T>> maxPriceFilter = null, Action<string, IQueryOver<T, T>> applyFilter = null)
+        public int Count(Action<IQueryOver<T, T>> applyFilter = null)
         {
             using (var session = Sessionfactory.OpenSession())
             {
                 try
                 {
                     var query = session.QueryOver<T>();
-                    maxPriceFilter?.Invoke(maxPrice,query);
-                    applyFilter?.Invoke(filter, query);
+                    applyFilter?.Invoke(query);
                     return query.RowCount();
                 }
                 catch (HibernateException e)
                 {
                     _log.Error(
-                        $"Exception occured when system tried to get the count of {_entityName} from database with filter ={filter}",
+                        $"Exception occured when system tried to get the count of {_entityName} from database",
                         e);
                     throw;
                 }

@@ -1,34 +1,18 @@
 ﻿using System;
-using NHibernate;
 using NHibernate.Type;
 
 namespace ShoppingCart.DAL.NHibernate
 {
-    public class ModifiedDateInterceptor : EmptyInterceptor
+    public class ModifiedDateInterceptor : BaseInterceptor<DateTime>
     {
-        public override bool OnSave(object entity, object id, object[] state, string[] propertyNames, IType[] types)
-        {
-            for (var i = 0; i < propertyNames.Length; i++)
-            {
-                if (propertyNames[i] != "ModifiedDate") continue;
-                state[i] = DateTime.Now;
-                return true;
-            }
-            return false;
-        }
+        private const string Property = "ModifiedDate";
+       
+        public ModifiedDateInterceptor() : base(Property, DateTime.Now) { }
 
         public override bool OnFlushDirty(object entity, object id, object[] currentState, object[] prevousState, string[] propertyNames,
-            IType[] types)
+                  IType[] types)
         {
-            for (var i = 0; i < propertyNames.Length; i++)
-            {
-                if (propertyNames[i] != "ModifiedDate") continue;
-                currentState[i] = DateTime.Now;
-                return true;
-            }
-            return false;
+            return SetValue(currentState, propertyNames, DateTime.Now);
         }
-
     }
-
 }

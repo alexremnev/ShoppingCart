@@ -14,7 +14,7 @@ namespace ShoppingCart.Business
 
         public IList<Customer> List(string filter, string sortby, bool isAscending, int firstResult, int maxResults)
         {
-            var list = _repo.List(null, null, true, firstResult, maxResults);
+            var list = _repo.List(firstResult, maxResults);
             return list;
         }
 

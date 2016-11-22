@@ -1,28 +1,21 @@
-﻿using NHibernate;
-using NHibernate.Type;
+﻿using NHibernate.Type;
 
 namespace ShoppingCart.DAL.NHibernate
 {
-    public class CreatorInterceptor : EmptyInterceptor
+    public class CreatorInterceptor : BaseInterceptor<string>
     {
+        private const string Property = "Creator";
         private readonly ISecurityContext _context;
 
-        public CreatorInterceptor(ISecurityContext context)
+        public CreatorInterceptor(ISecurityContext context) : base(Property, null)
         {
             _context = context;
         }
         public override bool OnSave(object entity, object id, object[] state, string[] propertyNames, IType[] types)
         {
-            for (var i = 0; i < propertyNames.Length; i++)
-            {
-                if (propertyNames[i] == "Creator")
-                {
-                    state[i] = _context.UserName;
-                    return true;
-                }
-            }
+            if (entity is IChangeableEntity) return SetValue(state, propertyNames, _context.UserName);
             return false;
+            
         }
-
     }
 }

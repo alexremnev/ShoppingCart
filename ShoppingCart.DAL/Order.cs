@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ShoppingCart.DAL
 {
-    public class Order : BaseEntity
+    public class Order : BaseEntity, IChangeableEntity
     {
         public virtual int Id { get; set; }
         public virtual decimal Total { get; set; }

@@ -3,13 +3,19 @@ using System.Data;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 using ShoppingCart.Business;
-using Spring.Context.Support;
 
 namespace ShoppingCart.DAL.NHibernate
 {
     public class EncryptedString : IUserType
     {
-        private static readonly ICryptoEngine CryptoEngine = new XmlApplicationContext("config://spring/objects", "assembly://ShoppingCart.DAL.NHibernate/ShoppingCart.DAL.NHibernate/config.xml").GetObject<CryptoEngine>();
+        //        private readonly ICryptoEngine _cryptoEngine;
+        public ICryptoEngine _cryptoEngine { get; set; }
+        public EncryptedString()
+        {
+            //_cryptoEngine = new CryptoEngine("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=", "AAECAwQFBgcICQoLDA0ODw==");
+
+        }
+
         bool IUserType.Equals(object x, object y)
         {
             return Equals(x, y);
@@ -26,7 +32,7 @@ namespace ShoppingCart.DAL.NHibernate
             if (r == DBNull.Value)
                 return null;
             var r1 = (string)rs[names[0]];
-            return CryptoEngine.Decrypt(r1);
+            return _cryptoEngine.Decrypt(r1);
         }
 
         public void NullSafeSet(IDbCommand cmd, object value, int index)
@@ -35,7 +41,7 @@ namespace ShoppingCart.DAL.NHibernate
 
             else
             {
-                var encryptedString = CryptoEngine.Encrypt((string)value);
+                var encryptedString = _cryptoEngine.Encrypt((string)value);
                 ((IDataParameter)cmd.Parameters[index]).Value = encryptedString;
             }
         }

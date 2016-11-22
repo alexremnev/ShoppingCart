@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="BaseEntity.cs" />
     <Compile Include="Customer.cs" />
+    <Compile Include="IChangeableEntity.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ICustomerRepository.cs" />
     <Compile Include="IOrderRepository.cs" />

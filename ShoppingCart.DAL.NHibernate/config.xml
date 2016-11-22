@@ -32,17 +32,11 @@
     <property name="SessionFactory" ref="NHibernateSessionFactory"/>
     <property name="NestedTransactionsAllowed" value="true" />
   </object>
-
-
-  <object id="ComplexInterceptor" type="ShoppingCart.DAL.NHibernate.ComplexInterceptor">
-    <constructor-arg name="creatorInterceptor" ref="CreatorInterceptor" />
-    <constructor-arg name="modifiedInterceptor" ref="ModifiedDateInterceptor" />
-    <constructor-arg name="createdInterceptor" ref="CreatedDateInterceptor" />
-  </object>
+  <object id="ComplexInterceptor" type="ShoppingCart.DAL.NHibernate.ComplexInterceptor" autowire="autodetect"/>
   <object id="CreatorInterceptor" type ="ShoppingCart.DAL.NHibernate.CreatorInterceptor">
-    <constructor-arg name="context" ref="SecurityService" />
+    <constructor-arg name="context" ref="SecurityContext" />
   </object>
   <object id="ModifiedDateInterceptor" type ="ShoppingCart.DAL.NHibernate.ModifiedDateInterceptor"/>
   <object id="CreatedDateInterceptor" type ="ShoppingCart.DAL.NHibernate.CreatedDateInterceptor"/>
-  <object id="SecurityService" type="ShoppingCart.DAL.NHibernate.SecurityContext" singleton="true"/>
+  <object id="SecurityContext" type="ShoppingCart.DAL.NHibernate.SecurityContext" singleton="true"/>
 </objects>

@@ -14,6 +14,7 @@ namespace ShoppingCart.Business
             _key = Convert.FromBase64String(key);
             _iv = Convert.FromBase64String(iv);
         }
+
         public string Encrypt(string text)
         {
             if (text == null || text.Length <= 0)

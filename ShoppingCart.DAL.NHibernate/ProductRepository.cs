@@ -11,7 +11,6 @@ namespace ShoppingCart.DAL.NHibernate
     {
         private const string DefaultSortby = "id";
         private static readonly ILog Log = LogManager.GetLogger<ProductRepository>();
-
         private const string NameEntity = "product";
 
         public ProductRepository() : base(Log, NameEntity) { }
@@ -24,22 +23,31 @@ namespace ShoppingCart.DAL.NHibernate
                 {"quantity", p => p.Quantity}
             };
 
-        public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true,
-             int firstResult = 0, int maxResults = 50)
+        public IList<Product> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50)
         {
             sortby = sortby ?? DefaultSortby;
             sortby = sortby.ToLowerInvariant();
             sortby = OrderByFuncs.ContainsKey(sortby) ? sortby : DefaultSortby;
-            Func<string, string, bool, IQueryOver<Product, Product>, IQueryOver<Product, Product>> applyFilters =
-                SetUpFilters;
-            return List(filter, sortby, isAscending, firstResult, maxResults, applyFilters);
+            Func<IQueryOver<Product, Product>, IQueryOver<Product, Product>> applyFilter =
+                delegate (IQueryOver<Product, Product> query)
+                {
+                    SetUpFilter(filter, query);
+                    var orderBy = query.OrderBy(OrderByFuncs[sortby]);
+                    var products = (isAscending) ? orderBy.Asc : orderBy.Desc;
+                    return products;
+                };
+            return List(firstResult, maxResults, applyFilter);
         }
 
         public int Count(string filter = null, decimal maxPrice = 0)
         {
-            Action<decimal, IQueryOver<Product, Product>> maxPriceFilter = SetUpMaxPriceFilter;
-            Action<string, IQueryOver<Product, Product>> applyFilter = SetUpFilter;
-            return Count(filter, maxPrice, maxPriceFilter, applyFilter);
+            Action<IQueryOver<Product, Product>> applyFilter = delegate (IQueryOver<Product, Product> query)
+            {
+                if (maxPrice > 0)
+                    query.And(x => x.Price > maxPrice);
+                SetUpFilter(filter, query);
+            };
+            return Count(applyFilter);
         }
 
         [Transaction]
@@ -57,7 +65,6 @@ namespace ShoppingCart.DAL.NHibernate
                     {
                         session.Delete(product);
                         transaction.Commit();
-
                     }
                     catch (Exception e)
                     {
@@ -74,21 +81,6 @@ namespace ShoppingCart.DAL.NHibernate
                     }
                 }
             }
-        }
-
-        private static void SetUpFilter(string filter, IQueryOver<Product, Product> query)
-        {
-            if (!string.IsNullOrEmpty(filter))
-            {
-                query
-                    .WhereRestrictionOn(x => x.Name)
-                    .IsInsensitiveLike($"%{filter}%");
-            }
-        }
-
-        private static void SetUpMaxPriceFilter(decimal maxPrice, IQueryOver<Product, Product> query)
-        {
-            query.And(x => x.Price > maxPrice);
         }
 
         public Product GetByName(string name)
@@ -111,12 +103,14 @@ namespace ShoppingCart.DAL.NHibernate
             return product;
         }
 
-        private static IQueryOver<Product, Product> SetUpFilters(string filter, string sortby, bool isAscending, IQueryOver<Product, Product> query)
+        private static void SetUpFilter(string filter, IQueryOver<Product, Product> query)
         {
-            SetUpFilter(filter, query);
-            var orderBy = query.OrderBy(OrderByFuncs[sortby]);
-            var products = (isAscending) ? orderBy.Asc : orderBy.Desc;
-            return products;
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query
+                    .WhereRestrictionOn(x => x.Name)
+                    .IsInsensitiveLike($"%{filter}%");
+            }
         }
     }
 }

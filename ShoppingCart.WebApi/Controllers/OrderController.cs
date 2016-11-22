@@ -5,6 +5,7 @@ using System.Web.Http;
 using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
+using ShoppingCart.DAL.NHibernate;
 
 namespace ShoppingCart.WebApi.Controllers
 {
@@ -15,7 +16,7 @@ namespace ShoppingCart.WebApi.Controllers
         private readonly IOrderService _orderService;
         private readonly IProductService _productService;
 
-        public OrderController(IOrderService orderService, IProductService productService) : base(Controller)
+        public OrderController(IOrderService orderService, IProductService productService, ISecurityContext context) : base(Controller, context)
         {
             _orderService = orderService;
             _productService = productService;

@@ -17,11 +17,10 @@ namespace ShoppingCart.WebApi.Controllers
         private const bool DefaultSortDirection = true;
         private readonly IProductService _productService;
 
-        public ProductController(IProductService productService) : base(Controller)
+        public ProductController(IProductService productService, ISecurityContext context) : base(Controller, context)
         {
             _productService = productService;
         }
-        public ISecurityContext Context { get; set; }
 
         // GET api/product/list
         [HttpGet]
@@ -61,7 +60,6 @@ namespace ShoppingCart.WebApi.Controllers
                 if (entity.Quantity < 0) return BadRequest("Quantity can't be less then 0");
                 var products = _productService.GetByName(entity.Name);
                 if (products != null) return BadRequest("Name is not unique");
-                Context.UserName = GenerateName();
                 _productService.Create(entity);
                 return CreatedAtRoute(WebApiConfig.DefaultRoute, new { controller = Controller, id = entity.Id }, entity.Id);
             }

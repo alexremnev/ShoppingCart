@@ -20,10 +20,12 @@ namespace ShoppingCart.Business
         /// <param name="id">entity id.</param>
         /// <returns>found entity or null.</returns>
         TEntity Get(int id);
+
         /// <summary>
         /// Get the count of entities.
         /// </summary>
         /// <param name="filter">filter of entity or null.</param>
+        /// <param name="maxPrice">price filter or 0.</param>
         /// <returns>found number of entities</returns>
         int Count(string filter,decimal maxPrice);
 

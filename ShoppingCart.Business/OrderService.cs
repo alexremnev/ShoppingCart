@@ -17,7 +17,7 @@ namespace ShoppingCart.Business
 
         public IList<Order> List(string filter, string sortby, bool isAscending, int firstResult, int maxResults)
         {
-            return _orderRepository.List(null, null, true, firstResult, maxResults);
+            return _orderRepository.List( firstResult, maxResults);
         }
 
         public Order Get(int id)

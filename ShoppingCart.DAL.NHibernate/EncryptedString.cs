@@ -8,14 +8,13 @@ namespace ShoppingCart.DAL.NHibernate
 {
     public class EncryptedString : IUserType
     {
-        //        private readonly ICryptoEngine _cryptoEngine;
-        public ICryptoEngine _cryptoEngine { get; set; }
-        public EncryptedString()
+        private readonly ICryptoEngine _cryptoEngine;
+      
+        public EncryptedString(ICryptoEngine cryptoEngine)
         {
-            //_cryptoEngine = new CryptoEngine("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=", "AAECAwQFBgcICQoLDA0ODw==");
-
+            _cryptoEngine = cryptoEngine;
         }
-
+       
         bool IUserType.Equals(object x, object y)
         {
             return Equals(x, y);

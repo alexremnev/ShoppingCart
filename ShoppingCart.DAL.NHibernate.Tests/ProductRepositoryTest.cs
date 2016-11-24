@@ -4,6 +4,8 @@ using System.Linq;
 using Common.Logging;
 using NHibernate;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NHibernate.Bytecode.Lightweight;
+using Spring.Data.NHibernate;
 using Spring.Testing.Microsoft;
 
 namespace ShoppingCart.DAL.NHibernate.Tests
@@ -27,6 +29,128 @@ namespace ShoppingCart.DAL.NHibernate.Tests
                 transaction.Commit();
             }
         }
+
+
+
+
+
+
+
+
+        //[TestMethod]
+        //public void Test()
+        //{
+        //    var springlocalSessionFactoryObject = new SpringLocalSessionFactoryObject();
+        //    springlocalSessionFactoryObject.ByteCodeProvider = new SpringByteCodeProvider();
+
+        //    var nHibernate = springlocalSessionFactoryObject.NHibernate;
+
+        //    var userTypeInstance = nHibernate.ByteCodeProvider.Factory.CreateInstance("EncryptedString");
+        //}
+
+        //class SpringLocalSessionFactoryObject
+        //{
+        //    public SpringLocalSessionFactoryObject()
+        //    {
+        //        NHibernate = new NHibernate();
+        //    }
+
+        //    public IByteCodeProvider ByteCodeProvider
+        //    {
+        //        set
+        //        {
+        //            NHibernate.ByteCodeProvider = value;
+        //        }
+        //    }
+
+        //    public NHibernate NHibernate { get; }
+        //}
+
+        //class NHibernate
+        //{
+        //    private IByteCodeProvider _byteCodeProvider;
+
+        //    public IByteCodeProvider ByteCodeProvider
+        //    {
+        //        get { return _byteCodeProvider ?? (_byteCodeProvider = new DefaultNHibernateByteCodeProvider()); }
+        //        set { _byteCodeProvider = value; }
+        //    }
+        //}
+
+        //interface IFactory
+        //{
+        //    object CreateInstance(string type);
+        //}
+
+        //private class SpringFactory : IFactory
+        //{
+        //    public object CreateInstance(string type)
+        //    {
+        //        //                return springContext.GetObject(type);
+        //        return type;
+        //    }
+        //}
+
+        //private class DefaultNHibernateFactory : IFactory
+        //{
+        //    public object CreateInstance(string type)
+        //    {
+        //        return new EncryptedString();
+        //    }
+        //}
+
+        //interface IByteCodeProvider
+        //{
+        //    IFactory Factory { get; }
+        //}
+
+        //private class SpringByteCodeProvider : IByteCodeProvider
+        //{
+        //    public SpringByteCodeProvider()
+        //    {
+        //        Factory = new SpringFactory();
+        //    }
+
+        //    public IFactory Factory { get; }
+        //}
+
+        //private class DefaultNHibernateByteCodeProvider : IByteCodeProvider
+        //{
+        //    public IFactory Factory
+        //    {
+        //        get { return new DefaultNHibernateFactory(); }
+        //    }
+        //}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         [TestInitialize]
         public void SetupContext()
@@ -127,7 +251,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
             repository.Update(null);
         }
 
-       [TestMethod]
+        [TestMethod]
         public void Can_remove_product_by_id()
         {
             Product[] list =
@@ -308,14 +432,14 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         public void Can_get_product_by_name()
         {
             const string name = "Car";
-            var product = new Product {Name = "Car"};
-            var list =  new List<Product> {product};
+            var product = new Product { Name = "Car" };
+            var list = new List<Product> { product };
             CreateInitialData(list);
             var expected = product;
             var repository = ProductRepository;
             var actual = repository.GetByName(name);
 
-           CompareProducts(expected,actual);
+            CompareProducts(expected, actual);
         }
 
         private static void AssertList(IList<Product> expectedList, IList<Product> actualList)
@@ -383,3 +507,4 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         };
     }
 }
+

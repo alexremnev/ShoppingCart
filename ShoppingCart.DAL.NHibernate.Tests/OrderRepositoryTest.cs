@@ -14,7 +14,6 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         public OrderRepository OrderRepository { get; set; }
         private static readonly ILog Log = LogManager.GetLogger<OrderRepositoryTest>();
 
-
         private void CreateInitialData(IList<Order> orders)
         {
             var initialList = orders;
@@ -46,7 +45,7 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         [TestMethod]
         public void Can_create_order()
         {
-            var expected = new Order { Total = 20000, LineItems = new List<LineItem> { new LineItem { ProductId = 2, Name = "Car", Price = 10000, Quantity = 2 } } };
+            var expected = new Order { Total = 20000, SaleDate = DateTime.Now, LineItems = new List<LineItem> { new LineItem { ProductId = 2, Name = "Car", Price = 10000, Quantity = 2 } } };
             var repository = OrderRepository;
 
             repository.Create(expected);
@@ -74,13 +73,13 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         public void Can_get_list_of_orders()
         {
             var list = new List<Order>
-            { new Order { Total = 20000, LineItems = new List<LineItem>
+            { new Order { Total = 20000, SaleDate = DateTime.Now, LineItems = new List<LineItem>
                 {
                     new LineItem { ProductId = 1, Name = "Car", Price = 10000, Quantity = 2 },
                 }},
                 new Order
             {
-                Total = 20000, LineItems = new List<LineItem>
+                Total = 20000, SaleDate = DateTime.Now, LineItems = new List<LineItem>
                 {
                     new LineItem { ProductId = 2, Name = "House", Price = 20000, Quantity = 3 }
 
@@ -108,10 +107,10 @@ namespace ShoppingCart.DAL.NHibernate.Tests
         {
             Assert.AreEqual(expected.Id, actual.Id);
             Assert.AreEqual(expected.Total, actual.Total);
-          
+
             for (var i = 1; i < expected.LineItems.Count; i++)
             {
-                Assert.AreEqual(expected.LineItems[i],actual.LineItems[i]);
+                Assert.AreEqual(expected.LineItems[i], actual.LineItems[i]);
             }
         }
 

@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
+using ShoppingCart.DAL.NHibernate;
 using ShoppingCart.WebApi.Controllers;
 
 namespace ShoppingCart.WebApi.Tests
@@ -33,8 +34,10 @@ namespace ShoppingCart.WebApi.Tests
             var expected = list;
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockOrderService.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.List(0, 5) as OkNegotiatedContentResult<IList<Order>>;
@@ -50,7 +53,9 @@ namespace ShoppingCart.WebApi.Tests
             //Arrange
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
             var incorrectPages = new List<int> { -100, -1, 0 };
             //Act
             foreach (var incorrectPage in incorrectPages)
@@ -67,7 +72,9 @@ namespace ShoppingCart.WebApi.Tests
             //Arrange
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
             var incorrectPageSizes = new List<int> { -1, 0, 251 };
             //Act
             foreach (var incorrectPageSize in incorrectPageSizes)
@@ -83,8 +90,10 @@ namespace ShoppingCart.WebApi.Tests
         {
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockOrderService.Setup(m => m.List(null, null, true, 0, 5)).Throws(new Exception());
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
             var actual = controller.List(0, 5) as InternalServerErrorResult;
             Assert.IsNotNull(actual);
         }
@@ -96,10 +105,12 @@ namespace ShoppingCart.WebApi.Tests
             const int id = 7;
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             var lineItem = new List<LineItem> { new LineItem { Name = "Car", Price = 20000, Quantity = 1 } };
             var expected = new Order { Id = id, LineItems = lineItem };
             mockOrderService.Setup(m => m.Get(id)).Returns(expected);
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.GetById(id) as OkNegotiatedContentResult<Order>;
@@ -116,8 +127,10 @@ namespace ShoppingCart.WebApi.Tests
             var notExistIds = new List<int> { 100, 692 };
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockOrderService.Setup(m => m.Get(It.IsAny<int>())).Returns((Order)null);
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             foreach (var notExistId in notExistIds)
@@ -136,8 +149,10 @@ namespace ShoppingCart.WebApi.Tests
             var negativeId = new List<int> { -1, -2, -100 };
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockOrderService.Setup(m => m.Get(It.IsAny<int>())).Returns((Order)null);
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             foreach (var id in negativeId)
@@ -155,8 +170,10 @@ namespace ShoppingCart.WebApi.Tests
             const int id = 1;
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockOrderService.Setup(m => m.Get(id)).Throws(new Exception());
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             var actual = controller.GetById(id) as InternalServerErrorResult;
 
@@ -176,9 +193,11 @@ namespace ShoppingCart.WebApi.Tests
             var expectedRouteValue = order.Id;
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockProductService.Setup(m => m.Get(It.IsAny<int>())).Returns(product);
             mockOrderService.Setup(m => m.Place(order));
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.Place(order) as CreatedAtRouteNegotiatedContentResult<int>;
@@ -197,7 +216,9 @@ namespace ShoppingCart.WebApi.Tests
             const string expected = "Entity is not valid";
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.Place(null) as BadRequestErrorMessageResult;
@@ -216,7 +237,9 @@ namespace ShoppingCart.WebApi.Tests
             };
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.Place(order) as BadRequestErrorMessageResult;
@@ -240,8 +263,10 @@ namespace ShoppingCart.WebApi.Tests
             };
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockProductService.Setup(m => m.Get(notExistLineItemId)).Returns((Product)null);
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.Place(order) as BadRequestErrorMessageResult;
@@ -255,8 +280,8 @@ namespace ShoppingCart.WebApi.Tests
             //Arrange
             const int id = 1;
             var product = new Product { Id = 1, Name = "Car", Price = 20000, Quantity = 3 };
-            const string expected = "Quantity can't be less then 0";
-
+            const string expected = "Quantity can't be less than 0";
+                                     
             var order = new Order
             {
                 LineItems = new List<LineItem>
@@ -266,8 +291,10 @@ namespace ShoppingCart.WebApi.Tests
             };
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockProductService.Setup(m => m.Get(id)).Returns(product);
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.Place(order) as BadRequestErrorMessageResult;
@@ -289,8 +316,10 @@ namespace ShoppingCart.WebApi.Tests
             };
             var mockOrderService = new Mock<IOrderService>();
             var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             mockProductService.Setup(m => m.Get(id)).Throws(new Exception());
-            var controller = new OrderController(mockOrderService.Object, mockProductService.Object);
+            var controller = new OrderController(mockOrderService.Object, mockProductService.Object, mockSecurityContext.Object);
 
             //Act
             var actual = controller.Place(order) as InternalServerErrorResult;
@@ -299,3 +328,4 @@ namespace ShoppingCart.WebApi.Tests
 
     }
 }
+

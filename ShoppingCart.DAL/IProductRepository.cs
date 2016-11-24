@@ -25,7 +25,6 @@ namespace ShoppingCart.DAL
         /// <param name="name">entity name of product</param>
         /// <returns>found entity. If product not exist or amount of product more then 2 return null.</returns>
         Product GetByName(string name);
-
         /// <summary>
         /// Get the count of entities.
         /// </summary>

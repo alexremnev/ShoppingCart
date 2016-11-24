@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.DAL;
@@ -70,10 +71,10 @@ namespace ShoppingCart.Business.Tests
         {
             const int expected = 5;
             var mock = new Mock<IProductRepository>();
-            mock.Setup(m => m.Count(null,0)).Returns(expected);
+            mock.Setup(m => m.Count(null, 0)).Returns(expected);
             var service = new ProductService(mock.Object);
 
-            var actual = service.Count(null,0);
+            var actual = service.Count(null, 0);
             Assert.AreEqual(expected, actual);
         }
 
@@ -92,7 +93,7 @@ namespace ShoppingCart.Business.Tests
         public void Get_by_name()
         {
             const string name = "car";
-            var expected =  new Product { Name = "car" };
+            var expected = new Product { Name = "car" };
             var mock = new Mock<IProductRepository>();
             mock.Setup(m => m.GetByName(It.IsAny<string>())).Returns(expected);
             var service = new ProductService(mock.Object);

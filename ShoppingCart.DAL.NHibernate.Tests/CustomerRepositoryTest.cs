@@ -11,10 +11,11 @@ namespace ShoppingCart.DAL.NHibernate.Tests
     [TestClass]
     public class CustomerRepositoryTest : AbstractTransactionalSpringContextTests
     {
+       
         public ISessionFactory Sessionfactory { get; set; }
         public CustomerRepository CustomerRepository { get; set; }
 
-        private static readonly ILog Log = LogManager.GetLogger<ProductRepositoryTest>();
+        private static readonly ILog Log = LogManager.GetLogger<CustomerRepositoryTest>();
 
         private void CreateInitialData(IList<Customer> customers)
         {

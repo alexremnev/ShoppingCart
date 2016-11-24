@@ -69,7 +69,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.3.10\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.3.11\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
@@ -135,6 +135,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ShoppingCart.Business\ShoppingCart.Business.csproj">
+      <Project>{FB90F7AC-550E-4D9B-B530-AD13B1109D11}</Project>
+      <Name>ShoppingCart.Business</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ShoppingCart.DAL.NHibernate\ShoppingCart.DAL.NHibernate.csproj">
       <Project>{918d4204-b90d-4bb0-943e-b5c8515e9994}</Project>
       <Name>ShoppingCart.DAL.NHibernate</Name>

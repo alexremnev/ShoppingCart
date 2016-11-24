@@ -69,5 +69,6 @@ namespace ShoppingCart.Business
             }
             return plaintext;
         }
+
     }
 }

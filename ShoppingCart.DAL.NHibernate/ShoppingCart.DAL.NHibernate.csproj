@@ -88,7 +88,9 @@
     <Compile Include="CreatorInterceptor.cs" />
     <Compile Include="CustomerRepository.cs" />
     <Compile Include="DateTimeAsLong.cs" />
+    <Compile Include="ListAsJson.cs" />
     <Compile Include="ISecurityContext.cs" />
+    <Compile Include="JsonLineItemInterceptor.cs" />
     <Compile Include="SecurityContext.cs" />
     <Compile Include="ModifiedDateInterceptor.cs" />
     <Compile Include="EncryptedString.cs" />

@@ -12,7 +12,7 @@ namespace ShoppingCart.Business
             _repo = repo;
         }
 
-        public IList<Customer> List(string filter, string sortby, bool isAscending, int firstResult, int maxResults)
+        public IList<Customer> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50, string usename = null)
         {
             var list = _repo.List(firstResult, maxResults);
             return list;

@@ -7,13 +7,13 @@ namespace ShoppingCart.DAL.NHibernate
         private const string Property = "Creator";
         private readonly ISecurityContext _context;
 
-        public CreatorInterceptor(ISecurityContext context) : base(Property, null)
+        public CreatorInterceptor(ISecurityContext context) : base(Property)
         {
             _context = context;
         }
         public override bool OnSave(object entity, object id, object[] state, string[] propertyNames, IType[] types)
         {
-            if (entity is IChangeableEntity) return SetValue(state, propertyNames, _context.UserName);
+            if (entity is IAuditableEntity) return SetValue(state, propertyNames, _context.UserName);
             return false;
             
         }

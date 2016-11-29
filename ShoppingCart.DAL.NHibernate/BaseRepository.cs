@@ -40,14 +40,14 @@ namespace ShoppingCart.DAL.NHibernate
         public IList<T> List(int firstResult = 0, int maxResults = 50, Func<IQueryOver<T, T>, IQueryOver<T, T>> applyFilter = null)
         {
             if (firstResult < 0) firstResult = DefaultFirstResult;
-            if (maxResults < 0) maxResults = Count();
             if (maxResults == 0) return new List<T>();
             try
             {
                 using (var session = Sessionfactory.OpenSession())
                 {
                     var query = session.QueryOver<T>();
-                    var list = query.Skip(firstResult).Take(maxResults);
+                    var list = query.Skip(firstResult);
+                    if (maxResults > 0) list.Take(maxResults);
                     applyFilter?.Invoke(query);
                     return list.List();
                 }

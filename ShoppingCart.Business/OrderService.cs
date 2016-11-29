@@ -15,9 +15,9 @@ namespace ShoppingCart.Business
             _productService = productService;
         }
 
-        public IList<Order> List(string filter, string sortby, bool isAscending, int firstResult, int maxResults)
+        public IList<Order> List(string filter = null, string sortby = null, bool isAscending = true, int firstResult = 0, int maxResults = 50, string username = null)
         {
-            return _orderRepository.List( firstResult, maxResults);
+            return _orderRepository.List(firstResult,maxResults,username);
         }
 
         public Order Get(int id)
@@ -40,7 +40,7 @@ namespace ShoppingCart.Business
             _orderRepository.Update(entity);
         }
 
-        public int Count(string filter, decimal maxPrice)
+        public int Count(string filter = null, decimal maxPrice = 0)
         {
             return _orderRepository.Count();
         }

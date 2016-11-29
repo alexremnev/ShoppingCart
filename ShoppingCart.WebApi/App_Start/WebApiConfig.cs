@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Web.Http;
+using ShoppingCart.WebApi.Security;
 
 namespace ShoppingCart.WebApi
 {

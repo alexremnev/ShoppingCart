@@ -11,7 +11,7 @@ namespace ShoppingCart.Business
             _repo = repo;
         }
 
-        public IList<Product> List(string filter, string sortby, bool sortDirection, int firstResult, int maxResults)
+        public IList<Product> List(string filter = null, string sortby = null, bool sortDirection = true, int firstResult = 0, int maxResults = 50, string usename = null)
         {
             return _repo.List(filter, sortby, sortDirection, firstResult, maxResults);
         }

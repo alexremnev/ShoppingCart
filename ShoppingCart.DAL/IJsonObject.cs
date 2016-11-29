@@ -1,6 +1,6 @@
 ﻿namespace ShoppingCart.DAL
 {
-   public interface IChangeableEntity
+    public interface IJsonObject
     {
     }
 }

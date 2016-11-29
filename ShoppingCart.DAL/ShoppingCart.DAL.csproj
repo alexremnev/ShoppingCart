@@ -47,7 +47,10 @@
   <ItemGroup>
     <Compile Include="BaseEntity.cs" />
     <Compile Include="Customer.cs" />
-    <Compile Include="IChangeableEntity.cs" />
+    <Compile Include="Discount.cs" />
+    <Compile Include="IAuditableEntity.cs" />
+    <Compile Include="IChangeable.cs" />
+    <Compile Include="IJsonObject.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ICustomerRepository.cs" />
     <Compile Include="IOrderRepository.cs" />

@@ -1,4 +1,7 @@
-﻿using Common.Logging;
+﻿using System;
+using System.Collections.Generic;
+using Common.Logging;
+using NHibernate;
 
 namespace ShoppingCart.DAL.NHibernate
 {
@@ -8,5 +11,15 @@ namespace ShoppingCart.DAL.NHibernate
         private const string NameEntity = "order";
 
         public OrderRepository() : base(Log, NameEntity) { }
+        public IList<Order> List(int firstResult = 0, int maxResults = 50, string username = null)
+        {
+            Func<IQueryOver<Order, Order>, IQueryOver<Order, Order>> applyFilter =
+                delegate (IQueryOver<Order, Order> query)
+                {
+                   return query.And(x => x.UserName == username);
+                    
+                };
+            return List(firstResult, maxResults, applyFilter);
+        }
     }
 }

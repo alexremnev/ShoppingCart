@@ -23,11 +23,11 @@ namespace ShoppingCart.DAL.NHibernate
             {
                 interceptor.OnSave(entity, id, state, propertyNames, types);
             }
-
             return true;
         }
 
-        public override bool OnFlushDirty(object entity, object id, object[] currentState, object[] previousState, string[] propertyNames,
+        public override bool OnFlushDirty(object entity, object id, object[] currentState, object[] previousState,
+            string[] propertyNames,
             IType[] types)
         {
             foreach (var interceptor in _interceptors)
@@ -35,6 +35,26 @@ namespace ShoppingCart.DAL.NHibernate
                 interceptor.OnFlushDirty(entity, id, currentState, previousState, propertyNames, types);
             }
             return true;
+        }
+
+        public override bool OnLoad(object entity, object id, object[] state, string[] propertyNames, IType[] types)
+        {
+            foreach (var interceptor in _interceptors)
+            {
+                interceptor.OnLoad(entity, id, state, propertyNames, types);
+            }
+            return true;
+        }
+
+        public override int[] FindDirty(object entity, object id, object[] currentState, object[] previousState, string[] propertyNames,
+              IType[] types)
+        {
+            var result = new int[10];
+            foreach (var interceptor in _interceptors)
+            {
+               result = interceptor.FindDirty(entity, id, currentState, previousState, propertyNames, types);
+            }
+            return result;
         }
     }
 }

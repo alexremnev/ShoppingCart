@@ -4,11 +4,14 @@
     <id name="Id">
       <generator class="identity"/>
     </id>
+    <property name="UserName" column="UserName" />
     <property name="Total" column="Total" />
     <property name="Creator" column="Creator"/>
     <property name="SaleDate" type="ShoppingCart.DAL.NHibernate.DateTimeAsLong, ShoppingCart.DAL.NHibernate" column="SaleDate" />
     <property name="CreatedDate" column="CreatedDate" />
     <property name="ModifiedDate" column="ModifiedDate" />
+    <property name="Discount" type="ShoppingCart.DAL.NHibernate.ListAsJson, ShoppingCart.DAL.NHibernate" column="Discount" />
+    <property name="JsonLineItems" type ="ShoppingCart.DAL.NHibernate.ListAsJson, ShoppingCart.DAL.NHibernate" column="JsonLineItems" />
     <bag name ="LineItems" cascade = "all" lazy="false">
       <key column ="OrderId"/>
       <one-to-many class ="LineItem"/>

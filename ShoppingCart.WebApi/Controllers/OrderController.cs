@@ -6,9 +6,12 @@ using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
 using ShoppingCart.DAL.NHibernate;
+using ShoppingCart.WebApi.Security;
 
 namespace ShoppingCart.WebApi.Controllers
 {
+    [IdentityBasicAuthentication]
+    [Authorize]
     public class OrderController : BaseController<Order>
     {
         private const string Controller = "order";
@@ -23,11 +26,12 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         //api/order
+
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
         public IHttpActionResult List(int? page = null, int? pageSize = null)
         {
-            return List(null, null, true, page, pageSize);
+            return List(null, null, true, page, pageSize,User.Identity.Name);
         }
 
         // api/order/place
@@ -52,6 +56,7 @@ namespace ShoppingCart.WebApi.Controllers
                 {
                     return BadRequest("Quantity can't be less than 0");
                 }
+                entity.UserName = User.Identity.Name;
                 _orderService.Place(entity);
                 return CreatedAtRoute(WebApiConfig.DefaultRoute, new { controller = Controller, id = entity.Id }, entity.Id);
             }

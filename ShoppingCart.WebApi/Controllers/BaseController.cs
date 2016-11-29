@@ -15,14 +15,14 @@ namespace ShoppingCart.WebApi.Controllers
         private readonly string _entityName;
         private readonly ILog _log;
 
-        protected BaseController(string entityName,ISecurityContext context)
+        protected BaseController(string entityName, ISecurityContext context)
         {
             _log = LogManager.GetLogger(GetType());
             _entityName = entityName;
             context.UserName = GenerateName();
         }
 
-        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
+        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize, string usename = null)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace ShoppingCart.WebApi.Controllers
                 pageSize = pageSize <= 0 ? MaxPageSize : pageSize;
                 var firstResult = (page - 1) * pageSize;
                 sortDirection = sortDirection ?? DefaultSortDirection;
-                var entity = service.List(filter, sortby, sortDirection.Value, firstResult.Value, pageSize.Value);
+                var entity = service.List(filter, sortby, sortDirection.Value, firstResult.Value, pageSize.Value, usename);
                 return Ok(entity);
             }
             catch (Exception e)

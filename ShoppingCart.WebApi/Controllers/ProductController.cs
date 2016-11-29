@@ -5,6 +5,7 @@ using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
 using ShoppingCart.DAL.NHibernate;
+using ShoppingCart.WebApi.Security;
 
 namespace ShoppingCart.WebApi.Controllers
 {
@@ -25,7 +26,7 @@ namespace ShoppingCart.WebApi.Controllers
         // GET api/product/list
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
-        public new IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
+        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
         {
             return base.List(filter, sortby, sortDirection, page, pageSize);
         }

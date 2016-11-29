@@ -105,12 +105,10 @@ namespace ShoppingCart.DAL.NHibernate
 
         private static void SetUpFilter(string filter, IQueryOver<Product, Product> query)
         {
-            if (!string.IsNullOrEmpty(filter))
-            {
-                query
-                    .WhereRestrictionOn(x => x.Name)
-                    .IsInsensitiveLike($"%{filter}%");
-            }
+            if (string.IsNullOrEmpty(filter)) return;
+            query
+                .WhereRestrictionOn(x => x.Name)
+                .IsInsensitiveLike($"%{filter}%");
         }
     }
 }

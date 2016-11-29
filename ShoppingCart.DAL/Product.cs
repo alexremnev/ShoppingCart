@@ -1,6 +1,6 @@
 ﻿namespace ShoppingCart.DAL
 {
-    public class Product : BaseEntity, IChangeableEntity
+    public class Product : BaseEntity, IAuditableEntity
     {
         public virtual int Id { get; set; }
         public virtual string Name { get; set; }

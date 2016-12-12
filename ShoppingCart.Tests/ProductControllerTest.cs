@@ -27,7 +27,7 @@ namespace ShoppingCart.Tests
             var expected = list;
             var mock = new Mock<IProductService>();
             mock.Setup(m => m.Count(null,0)).Returns(list.Count);
-            mock.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
+            mock.Setup(m => m.List(null, null, true, 0, 5,null)).Returns(list);
             var controller = new ProductController(mock.Object);
 
             //Act
@@ -53,7 +53,7 @@ namespace ShoppingCart.Tests
             {
                 controller.List(null, null, null, incorrectPage, 5);
                 //Assert
-                mock.Verify(ps => ps.List(null, null, true, 0, 5));
+                mock.Verify(ps => ps.List(null, null, true, 0, 5,null));
             }
         }
 
@@ -72,7 +72,7 @@ namespace ShoppingCart.Tests
                 controller.List(null, null, null, 1, incorrectPageSize);
 
                 //Assert
-                mock.Verify(ps => ps.List(null, null, true, 0, 50));
+                mock.Verify(ps => ps.List(null, null, true, 0, 50,null));
             }
         }
 

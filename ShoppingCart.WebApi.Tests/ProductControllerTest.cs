@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
+using System.Threading;
+using System.Web.Http;
 using System.Web.Http.Results;
+using System.Web.Http.Routing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
 using ShoppingCart.DAL.NHibernate;
 using ShoppingCart.WebApi.Controllers;
+using ShoppingCart.WebApi.Security;
 
 namespace ShoppingCart.WebApi.Tests
 {
@@ -29,7 +36,7 @@ namespace ShoppingCart.WebApi.Tests
                     };
             var expected = list;
             var mockProductService = new Mock<IProductService>();
-            mockProductService.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
+            mockProductService.Setup(m => m.List(null, null, true, 0, 5, null)).Returns(list);
             var mockSecurityContext = new Mock<ISecurityContext>();
             mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
             var controller = new ProductController(mockProductService.Object, mockSecurityContext.Object);
@@ -56,7 +63,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(null, null, null, incorrectPage, 5);
                 //Assert
-                mockProductService.Verify(ps => ps.List(null, null, true, 0, 5));
+                mockProductService.Verify(ps => ps.List(null, null, true, 0, 5, null));
             }
         }
 
@@ -74,7 +81,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(null, null, null, 1, incorrectPageSize);
                 //Assert
-                mockProductService.Verify(ps => ps.List(null, null, true, 0, 50));
+                mockProductService.Verify(ps => ps.List(null, null, true, 0, 50, null));
             }
         }
 
@@ -85,7 +92,7 @@ namespace ShoppingCart.WebApi.Tests
             var mockProductService = new Mock<IProductService>();
             var mockSecurityContext = new Mock<ISecurityContext>();
             mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
-            mockProductService.Setup(m => m.List(null, null, true, 1, 5)).Returns((IList<Product>)null);
+            mockProductService.Setup(m => m.List(null, null, true, 1, 5, null)).Returns((IList<Product>)null);
             var controller = new ProductController(mockProductService.Object, mockSecurityContext.Object);
             const string notExistentFilter = "notExistentFilter";
 
@@ -130,6 +137,13 @@ namespace ShoppingCart.WebApi.Tests
             var controller = new ProductController(mockProductService.Object, mockSecurityContext.Object);
 
             //Act
+            var claims = new List<Claim>//todo:delete it
+                {
+                    new Claim(ClaimTypes.Name,"Bob"),
+                    new Claim(ClaimTypes.Role, "class-mate")
+                };
+            IPrincipal principal = new ClaimsPrincipal(new[] { new ClaimsIdentity(claims, "Token") });
+            Thread.CurrentPrincipal = principal;
             var actual = controller.GetById(id) as OkNegotiatedContentResult<Product>;
             Assert.IsNotNull(actual);
 
@@ -495,6 +509,52 @@ namespace ShoppingCart.WebApi.Tests
             }
             return name.ToString();
         }
+
+
+        [TestMethod]
+        public void Test()
+        {
+            // Arrange
+            //  ProductsController controller = new ProductsController(repository);
+            const int id = 7;
+            var mockProductService = new Mock<IProductService>();
+            var mockSecurityContext = new Mock<ISecurityContext>();
+            mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
+            var expected = new Product { Id = id, Name = "Car yellow", Quantity = 5, Price = 15000 };
+            mockProductService.Setup(m => m.Get(id)).Returns(expected);
+            var controller = new ProductController(mockProductService.Object, mockSecurityContext.Object)
+            {
+                Request = new HttpRequestMessage
+                {
+                    RequestUri = new Uri("http://localhost/api/product/7")
+                },
+                Configuration = new HttpConfiguration()
+            };
+            //controller.Configuration.Routes.MapHttpRoute(
+            //    name: "DefaultApi",
+            //    routeTemplate: "api/{controller}/{id}",
+            //    defaults: new { id = RouteParameter.Optional });
+
+            //controller.RequestContext.RouteData = new HttpRouteData(
+            //    route: new HttpRoute(),
+            //    values: new HttpRouteValueDictionary { { "controller", "product", "1" } });
+
+            // Act
+            var claims = new List<Claim>//todo:delete it
+                {
+                    new Claim(ClaimTypes.Name,"Bob"),
+                    new Claim(ClaimTypes.Role, "class-mate")
+                };
+            IPrincipal principal = new ClaimsPrincipal(new[] { new ClaimsIdentity(claims, "Token") });
+            Thread.CurrentPrincipal = principal;
+            controller.RequestContext.Principal = principal;
+            var response = controller.GetById(7) as UnauthorizedResult;
+
+            // Assert
+            Assert.IsNotNull(response);
+
+        }
+
     }
 }
 

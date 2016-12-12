@@ -9,6 +9,7 @@ using ShoppingCart.DAL.NHibernate;
 
 namespace ShoppingCart.WebApi.Controllers
 {
+    [AllowAnonymous]
     public class CustomerController : BaseController<Customer>
     {
         private const string Controller = "customer";

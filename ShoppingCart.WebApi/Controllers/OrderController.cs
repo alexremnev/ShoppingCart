@@ -6,12 +6,10 @@ using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
 using ShoppingCart.DAL.NHibernate;
-using ShoppingCart.WebApi.Security;
 
 namespace ShoppingCart.WebApi.Controllers
 {
-    [IdentityBasicAuthentication]
-    [Authorize]
+    [AllowAnonymous]
     public class OrderController : BaseController<Order>
     {
         private const string Controller = "order";
@@ -26,12 +24,12 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         //api/order
-
+        [Authorize(Roles = "admin, superUser, user")]
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
         public IHttpActionResult List(int? page = null, int? pageSize = null)
         {
-            return List(null, null, true, page, pageSize,User.Identity.Name);
+            return List(null, null, true, page, pageSize, User.Identity.Name);
         }
 
         // api/order/place
@@ -67,6 +65,7 @@ namespace ShoppingCart.WebApi.Controllers
             }
         }
         // GET api/order/id
+        [Authorize(Roles = "admin, superUser")]
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/{id}")]
         public IHttpActionResult GetById(int id)
@@ -80,6 +79,7 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         //PUT api/order
+        [Authorize(Roles = "admin, superUser")]
         [HttpPut]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
         public IHttpActionResult Update([FromBody] Order order)
@@ -122,6 +122,7 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         // GET api/order/count/
+        [Authorize(Roles = "admin, superUser")]
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/count")]
         public IHttpActionResult Count()

@@ -2,6 +2,8 @@
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Http;
+using ShoppingCart.Business;
+using Spring.Context.Support;
 using Spring.Web.Mvc;
 
 namespace ShoppingCart.WebApi
@@ -13,7 +15,24 @@ namespace ShoppingCart.WebApi
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
-            ValueProviderFactories.Factories.Add(new JsonValueProviderFactory());
+            AddConfigObject();
+        }
+
+        private void AddConfigObject()
+        {
+            var t = typeof(TestService);
+            var attributes = t.GetCustomAttributes(false);
+            foreach (var attribute in attributes)
+            {
+                var type = attribute.GetType();
+
+                if (type.Name != "TestAttribute") continue;
+                var context = ContextRegistry.GetContext();
+                var service = new TestService();
+                context.ConfigureObject(service, "Service");
+                var xmlContext = context as XmlApplicationContext;
+                xmlContext?.ObjectFactory.RegisterSingleton("Service", service);
+            }
         }
     }
 }

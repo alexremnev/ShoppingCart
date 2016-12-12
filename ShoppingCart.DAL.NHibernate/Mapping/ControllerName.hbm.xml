@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" namespace="ShoppingCart.DAL" assembly="ShoppingCart.DAL">
+  <class name="ControllerName" table ="ControllerName">
+    <id name="Id">
+      <generator class="identity"/>
+    </id>
+    <property name="Name" column="Name" />
+    <bag name ="Methods" cascade = "all" lazy="false">
+      <key column ="ControllerNameId"/>
+      <one-to-many class ="Method"/>
+    </bag>
+  </class>
+</hibernate-mapping>

@@ -5,12 +5,13 @@ using Common.Logging;
 using ShoppingCart.Business;
 using ShoppingCart.DAL;
 using ShoppingCart.DAL.NHibernate;
-using ShoppingCart.WebApi.Security;
 
 namespace ShoppingCart.WebApi.Controllers
 {
     public class ProductController : BaseController<Product>
     {
+        public ITestService Service { get; set; }
+
         private const string Controller = "product";
         private static readonly ILog Log = LogManager.GetLogger<ProductController>();
         private const int FirstPage = 1;
@@ -24,14 +25,16 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         // GET api/product/list
+        [AllowAnonymous]
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
-        public IHttpActionResult List(string filter = null, string sortby = null, bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
+        public IHttpActionResult List(string filter = null, string sortby = null,
+            bool? sortDirection = DefaultSortDirection, int? page = FirstPage, int? pageSize = MaxPageSize)
         {
             return base.List(filter, sortby, sortDirection, page, pageSize);
         }
 
-        // GET api/product/count/
+        // GET api/product/count
         [HttpGet]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/count")]
         public new IHttpActionResult Count(string filter = null, decimal maxPrice = 0)
@@ -48,6 +51,7 @@ namespace ShoppingCart.WebApi.Controllers
         }
 
         // POST api/product
+        [Authorize(Roles = "admin, superUser")]
         [HttpPost]
         [Route(WebApiConfig.SegmentOfRouteTemplate + Controller)]
         public IHttpActionResult Create([FromBody]Product entity)
@@ -110,6 +114,7 @@ namespace ShoppingCart.WebApi.Controllers
 
         // DELETE api/product/id
         [HttpDelete]
+        [Route(WebApiConfig.SegmentOfRouteTemplate + Controller + "/{id}")]
         public IHttpActionResult Delete(int id)
         {
             try

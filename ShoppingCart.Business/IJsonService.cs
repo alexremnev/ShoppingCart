@@ -6,6 +6,6 @@ namespace ShoppingCart.Business
     public interface IJsonService
     {
         string Serialize(object value);
-        IList<IJsonObject> Desirialize(string value);
+        IList<Discount> Desirialize(string value);
     }
 }

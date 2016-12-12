@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http.Formatting;
 using System.Web.Http;
-using ShoppingCart.WebApi.Security;
+using System.Web.Http.Filters;
+using Spring.Context.Support;
 
 namespace ShoppingCart.WebApi
 {
@@ -18,7 +19,10 @@ namespace ShoppingCart.WebApi
              new { id = RouteParameter.Optional },
              new { id = @"\d+" }
         );
-            config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
+            config.Formatters.Clear();
+            config.Formatters.Add(new JsonMediaTypeFormatter());
+            config.Filters.Add((IFilter)ContextRegistry.GetContext().GetObject("IdentityBasicAuthenticationAttribute"));
+            config.Filters.Add((IFilter)ContextRegistry.GetContext().GetObject("MyAuthorizeAttribute"));
         }
     }
 }

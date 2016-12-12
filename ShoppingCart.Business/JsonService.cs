@@ -10,10 +10,10 @@ namespace ShoppingCart.Business
         {
             return JsonConvert.SerializeObject(value);
         }
-
-        public IList<IJsonObject> Desirialize(string value)
+        
+        public IList<Discount> Desirialize(string value)
         {
-            return JsonConvert.DeserializeObject<IList<IJsonObject>>(value);
+            return JsonConvert.DeserializeObject<IList<Discount>>(value);
         }
     }
 }

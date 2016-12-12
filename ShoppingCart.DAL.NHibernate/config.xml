@@ -1,10 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <objects xmlns="http://www.springframework.net" xmlns:db="http://www.springframework.net/database" >
   <object id="ProductRepository" type="ShoppingCart.DAL.NHibernate.ProductRepository" autowire="autodetect" singleton="true" />
-
   <object id="OrderRepository" type="ShoppingCart.DAL.NHibernate.OrderRepository" autowire="autodetect" singleton="true" />
   <object id="CustomerRepository" type="ShoppingCart.DAL.NHibernate.CustomerRepository" autowire="autodetect" singleton="true" />
-
   <object type="Spring.Objects.Factory.Config.PropertyPlaceholderConfigurer, Spring.Core">
     <property name="ConfigSections" value="databaseSettings"/>
   </object>
@@ -22,7 +20,7 @@
         <entry key="connection.provider" value="NHibernate.Connection.DriverConnectionProvider" />
         <entry key="connection.driver_class" value="NHibernate.Driver.MySqlDataDriver" />
         <entry key="dialect" value="NHibernate.Dialect.MySQL5Dialect" />
-        <!--        <entry key="hbm2ddl.auto" value="create" />-->
+<!--        <entry key="hbm2ddl.auto" value="create" />-->
       </dictionary>
     </property>
     <property name="ExposeTransactionAwareSessionFactory" value="true" />
@@ -47,8 +45,10 @@
   <object id="BytecodeProvider" type="Spring.Data.NHibernate.Bytecode.BytecodeProvider" autowire="autodetect" singleton="true"/>
   <object id="EncryptedString" type="ShoppingCart.DAL.NHibernate.EncryptedString" autowire="autodetect" singleton="true"/>
   <object id="JsonLineItemInterceptor" type ="ShoppingCart.DAL.NHibernate.JsonLineItemInterceptor"/>
-
   <object id="JsonService" type="ShoppingCart.Business.JsonService, ShoppingCart.Business"/>
-
   <object id="ListAsJson" type="ShoppingCart.DAL.NHibernate.ListAsJson" autowire="autodetect" singleton="true"/>
+
+  <object id="IdentityRepository" type="ShoppingCart.DAL.NHibernate.IdentityRepository" autowire="autodetect" singleton="true" />
+  <object id="AuthorizeRepository" type="ShoppingCart.DAL.NHibernate.AuthorizeRepository" autowire="autodetect" singleton="true" />
+
 </objects>

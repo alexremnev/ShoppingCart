@@ -11,6 +11,6 @@ namespace ShoppingCart.DAL
         public virtual IList<LineItem> LineItems { get; set; }
         public virtual DateTime? SaleDate { get; set; }
         public virtual IList<Discount> Discount { get; set; }
-        public virtual IList<LineItem> JsonLineItems { get; set; }
+//        public virtual IList<LineItem> JsonLineItems { get; set; }
     }
 }

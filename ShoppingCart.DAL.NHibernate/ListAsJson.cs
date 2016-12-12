@@ -13,7 +13,7 @@ namespace ShoppingCart.DAL.NHibernate
         {
             _jsonService = jsonService;
         }
-       
+
         bool IUserType.Equals(object x, object y)
         {
             return Equals(x, y);

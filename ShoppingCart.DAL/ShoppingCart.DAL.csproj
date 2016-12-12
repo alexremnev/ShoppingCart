@@ -46,16 +46,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseEntity.cs" />
+    <Compile Include="ControllerName.cs" />
     <Compile Include="Customer.cs" />
     <Compile Include="Discount.cs" />
     <Compile Include="IAuditableEntity.cs" />
     <Compile Include="IChangeable.cs" />
+    <Compile Include="Identity.cs" />
+    <Compile Include="IIdentityRepository.cs" />
     <Compile Include="IJsonObject.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="ICustomerRepository.cs" />
     <Compile Include="IOrderRepository.cs" />
     <Compile Include="IProductRepository.cs" />
+    <Compile Include="IAuthorizeRepository.cs" />
     <Compile Include="LineItem.cs" />
+    <Compile Include="Method.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

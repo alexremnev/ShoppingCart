@@ -48,6 +48,7 @@
       <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <HintPath>..\packages\NHibernate.4.0.4.4000\lib\net40\NHibernate.dll</HintPath>
       <Private>True</Private>
@@ -88,9 +89,11 @@
     <Compile Include="CreatorInterceptor.cs" />
     <Compile Include="CustomerRepository.cs" />
     <Compile Include="DateTimeAsLong.cs" />
+    <Compile Include="IdentityRepository.cs" />
     <Compile Include="ListAsJson.cs" />
     <Compile Include="ISecurityContext.cs" />
     <Compile Include="JsonLineItemInterceptor.cs" />
+    <Compile Include="AuthorizeRepository.cs" />
     <Compile Include="SecurityContext.cs" />
     <Compile Include="ModifiedDateInterceptor.cs" />
     <Compile Include="EncryptedString.cs" />
@@ -129,6 +132,13 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Mapping\Customer.hbm.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\Identity.hbm.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\ControllerName.hbm.xml" />
+    <EmbeddedResource Include="Mapping\Method.hbm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

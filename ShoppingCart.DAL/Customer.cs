@@ -1,7 +1,4 @@
-﻿using System;
-using NHibernate.Properties;
-
-namespace ShoppingCart.DAL
+﻿namespace ShoppingCart.DAL
 {
     public class Customer : BaseEntity, IAuditableEntity
     {

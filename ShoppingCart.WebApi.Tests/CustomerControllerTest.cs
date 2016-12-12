@@ -28,7 +28,7 @@ namespace ShoppingCart.WebApi.Tests
             var mockCustomerService = new Mock<ICustomerService>();
             var mockSecurityContext = new Mock<ISecurityContext>();
             mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
-            mockCustomerService.Setup(m => m.List(null, null, true, 0, 5)).Returns(list);
+            mockCustomerService.Setup(m => m.List(null, null, true, 0, 5,null)).Returns(list);
             var controller = new CustomerController(mockCustomerService.Object, mockSecurityContext.Object);
 
             //Act
@@ -53,7 +53,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(incorrectPage, 5);
                 //Assert
-                mockCustomerService.Verify(ps => ps.List(null, null, true, 0, 5));
+                mockCustomerService.Verify(ps => ps.List(null, null, true, 0, 5,null));
             }
         }
 
@@ -71,7 +71,7 @@ namespace ShoppingCart.WebApi.Tests
             {
                 controller.List(1, incorrectPageSize);
                 //Assert
-                mockcustomerService.Verify(ps => ps.List(null, null, true, 0, 50));
+                mockcustomerService.Verify(ps => ps.List(null, null, true, 0, 50,null));
             }
         }
 
@@ -81,7 +81,7 @@ namespace ShoppingCart.WebApi.Tests
             var mockCustomerService = new Mock<ICustomerService>();
             var mockSecurityContext = new Mock<ISecurityContext>();
             mockSecurityContext.Setup(m => m.UserName).Returns("NewName");
-            mockCustomerService.Setup(m => m.List(null, null, true, 0, 5)).Throws(new Exception());
+            mockCustomerService.Setup(m => m.List(null, null, true, 0, 5,null)).Throws(new Exception());
             var controller = new CustomerController(mockCustomerService.Object, mockSecurityContext.Object);
             var actual = controller.List(0, 5) as InternalServerErrorResult;
             Assert.IsNotNull(actual);

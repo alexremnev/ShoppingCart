@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" namespace="ShoppingCart.DAL" assembly="ShoppingCart.DAL">
+  <class name="Identity" table ="Identity">
+    <id name="Id">
+      <generator class="identity"/>
+    </id>
+    <property name="UserName" column="UserName"/>
+    <property name="Password" type="ShoppingCart.DAL.NHibernate.EncryptedString, ShoppingCart.DAL.NHibernate" column="Password"/>
+    <property name="Role" column="Role"/>
+  </class>
+</hibernate-mapping>
